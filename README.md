@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Debt Planner 🏔️
 
-## Getting Started
+A private, browser-based debt payoff planner. List your debts, pick a payoff
+strategy, and see exactly when you'll be debt-free — plus how much interest a
+little extra each month saves you. No signup, no server: everything lives in
+your browser's local storage.
 
-First, run the development server:
+## Features
+
+- **Add debts** — name, balance, APR, and minimum payment.
+- **Avalanche vs. Snowball** — toggle strategies and see the payoff order.
+  - _Avalanche_: attack the highest interest rate first (saves the most money).
+  - _Snowball_: attack the smallest balance first (fastest wins, best for motivation).
+- **Side-by-side comparison** — see exactly how much money and time Avalanche
+  saves you over Snowball.
+- **Extra-payment slider** — drag it and watch your debt-free date jump earlier
+  and your interest drop.
+- **Payoff summary** — total debt, debt-free date, total interest, and monthly
+  payment at a glance.
+- **Balance-over-time chart** — visualize your journey to $0.
+- **Per-debt payoff dates** — know when each individual debt is cleared.
+- **Private by default** — data is stored only in your browser (localStorage).
+
+## Tech stack
+
+- Next.js 16 (App Router) + React 19
+- TypeScript
+- Tailwind CSS v4
+- Recharts
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Click **Try it with
+sample debts** to see it in action instantly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How the math works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The engine (`src/lib/debt.ts`) simulates month by month: it accrues interest
+(APR compounded monthly), pays every debt's minimum, then pours all remaining
+budget into the target debt for the chosen strategy. As each debt clears, its
+freed-up minimum rolls into the next target (the "snowball" effect). It flags
+plans where the budget can't cover the minimums, or where interest outpaces
+payments.
 
-## Learn More
+> Estimates only. Assumes fixed balances and rates. Not financial advice.
 
-To learn more about Next.js, take a look at the following resources:
+## Roadmap ideas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Log real payments and track progress against the plan
+- Milestone celebrations as each debt clears
+- Optional cloud sync + accounts (database + auth) for multi-device use
+- Reminders / notifications for upcoming payments
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is a static Next.js app — deploy to Vercel with `vercel` (or push to a Git
+repo connected to Vercel). No environment variables or database required.
