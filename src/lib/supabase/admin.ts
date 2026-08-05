@@ -1,0 +1,15 @@
+import { createClient } from "@supabase/supabase-js";
+
+/**
+ * Service-role Supabase client — BYPASSES Row-Level Security. Use ONLY in
+ * trusted server contexts that must write on the user's behalf without a user
+ * session (e.g. the Stripe webhook updating a profile's plan). Never import
+ * this into client code — the service-role key must never reach the browser.
+ */
+export function supabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}

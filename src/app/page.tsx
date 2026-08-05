@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { track } from "@/lib/analytics";
+import { HeroVisual } from "@/components/HeroVisual";
 import {
   PRICING,
   yearlyMonthlyEquivalent,
   yearlySavingsPct,
 } from "@/lib/tiers";
-import { HeroPreview } from "@/components/HeroPreview";
 import { StatCounter } from "@/components/StatCounter";
 import { Faq } from "@/components/Faq";
 import { Reveal } from "@/components/Reveal";
@@ -71,127 +71,96 @@ export default function Landing() {
   return (
     <main className="overflow-x-clip">
       {/* ---------- Hero ---------- */}
-      <section className="relative">
-        {/* decorative glow orbs (imagery, not boxes) */}
-        <div className="blob left-[8%] top-[6%] h-72 w-72 bg-[#3b5bd0]" />
-        <div
-          className="blob right-[4%] top-[24%] h-80 w-80 bg-[#2f7d6b]"
-          style={{ animationDelay: "-6s" }}
-        />
-        <div className="grid-overlay pointer-events-none absolute inset-0" />
+      <section className="relative flex min-h-[94vh] items-center overflow-hidden">
+        {/* 3D orb — the debt mass, floating on the right */}
+        <div className="pointer-events-none absolute inset-y-0 right-[-18%] z-0 hidden w-[70%] md:block lg:right-[-8%] lg:w-[58%]">
+          <div className="absolute left-1/2 top-1/2 h-[46vw] w-[46vw] max-h-[640px] max-w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand)]/18 blur-[130px]" />
+          <HeroVisual />
+        </div>
+        {/* small orb echo for mobile */}
+        <div className="blob left-1/2 top-24 h-72 w-72 -translate-x-1/2 bg-[var(--brand)] opacity-30 md:hidden" />
 
-        <div className="relative mx-auto w-full max-w-[1600px] px-4 pt-14 pb-10 sm:px-6 sm:pt-20 lg:w-4/5">
-          <div className="grid items-center gap-10 lg:grid-cols-2">
-            <div>
-              <div
-                className="hero-in flex flex-wrap items-center gap-2"
-                style={{ animationDelay: "0.05s" }}
-              >
-                <span className="flex items-center gap-2 rounded-full border border-[var(--success)]/30 bg-[var(--success)]/10 px-3 py-1.5 text-xs font-medium text-[var(--success)]">
-                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
-                  Free forever
-                </span>
-                <span className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]/80">
-                  🔒 100% private
-                </span>
-                <span className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-[var(--foreground)]/80">
-                  ⚡ Ready in 2 minutes
-                </span>
-              </div>
-              <h1
-                className="hero-in font-display mt-6 text-5xl font-bold leading-[0.98] tracking-[-0.035em] sm:text-6xl"
-                style={{ animationDelay: "0.14s" }}
-              >
-                <span className="text-gradient">Get Out of Debt.</span>
-                <br />
-                Simply and Smartly.
-              </h1>
-              <p
-                className="hero-in mt-6 max-w-lg text-sm leading-relaxed text-[var(--muted)] sm:text-base"
-                style={{ animationDelay: "0.24s" }}
-              >
-                Turn a pile of balances into one calm plan. See the exact order to
-                pay, the date you&apos;ll be free, and how much interest
-                you&apos;ll save — in minutes.
-              </p>
+        <div className="relative z-10 mx-auto w-full max-w-[1600px] px-4 py-20 sm:px-6 lg:w-4/5">
+          <div className="max-w-2xl">
+            <h1
+              className="hero-in font-display text-6xl font-bold leading-[0.92] tracking-[-0.04em] sm:text-7xl lg:text-8xl"
+              style={{ animationDelay: "0.06s" }}
+            >
+              Escape the
+              <br />
+              <span className="text-gradient">gravity</span> of debt.
+            </h1>
 
-              <form
-                onSubmit={start}
-                style={{ animationDelay: "0.34s" }}
-                className="hero-in glass mt-8 flex max-w-md items-center gap-2 rounded-full p-1.5 transition focus-within:border-[var(--brand)]/60 focus-within:ring-2 focus-within:ring-[var(--brand)]/15"
-              >
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email (optional)"
-                  className="min-w-0 flex-1 bg-transparent px-4 py-2 text-sm outline-none placeholder:text-[var(--muted)]"
-                />
-                <button
-                  type="submit"
-                  className="btn-white group flex shrink-0 items-center gap-1.5 px-5 py-2.5 text-sm"
-                >
-                  Get Started
-                  <span className="text-[var(--brand)] transition-transform duration-200 group-hover:translate-x-0.5">
-                    ↗
-                  </span>
-                </button>
-              </form>
+            <p
+              className="hero-in mt-8 max-w-xl text-base leading-relaxed text-[var(--muted)] sm:text-lg"
+              style={{ animationDelay: "0.26s" }}
+            >
+              Ledger turns your balances into one weightless plan — the exact
+              order to pay, the day you&apos;re free, and every dollar of
+              interest you&apos;ll shed along the way.
+            </p>
 
-              <div
-                className="hero-in mt-8 flex items-center gap-3"
-                style={{ animationDelay: "0.44s" }}
+            <form
+              onSubmit={start}
+              style={{ animationDelay: "0.38s" }}
+              className="hero-in glass mt-9 flex max-w-md items-center gap-2 rounded-full p-1.5 transition focus-within:border-[var(--brand)]/60 focus-within:ring-2 focus-within:ring-[var(--brand)]/15"
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email (optional)"
+                className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm outline-none placeholder:text-[var(--muted)]"
+              />
+              <button
+                type="submit"
+                className="btn-white group flex shrink-0 items-center gap-1.5 px-6 py-3 text-sm"
               >
-                <div className="flex -space-x-2.5">
-                  {[
-                    "from-[#5b7cfa] to-[#8fb0ff]",
-                    "from-[#45c795] to-[#8fe3c0]",
-                    "from-[#e2b25c] to-[#f2d391]",
-                  ].map((g) => (
-                    <span
-                      key={g}
-                      className={`h-9 w-9 rounded-full bg-gradient-to-br ${g} ring-2 ring-[var(--background)]`}
-                    />
-                  ))}
-                </div>
-                <div>
-                  <p className="font-display text-lg font-bold leading-none">
-                    $0 to start
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    Free forever for up to 3 debts.
-                  </p>
-                </div>
-              </div>
-            </div>
+                Start free
+                <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                  →
+                </span>
+              </button>
+            </form>
 
             <div
-              className="hero-in mt-8 lg:mt-0"
-              style={{ animationDelay: "0.3s" }}
+              className="hero-in mt-8 flex items-center gap-6 text-xs text-[var(--muted)]"
+              style={{ animationDelay: "0.5s" }}
             >
-              <HeroPreview />
+              <span className="flex items-center gap-1.5">🔒 100% private</span>
+              <span className="flex items-center gap-1.5">
+                ⚡ Ready in 2 minutes
+              </span>
+              <span className="flex items-center gap-1.5">💳 No card</span>
             </div>
           </div>
+        </div>
+
+        {/* scroll cue */}
+        <div className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 text-[var(--muted)] sm:flex">
+          <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
+          <span className="h-8 w-px animate-pulse bg-gradient-to-b from-[var(--muted)] to-transparent" />
         </div>
       </section>
 
       {/* ---------- Stats band ---------- */}
-      <section className="border-y border-[var(--border)] bg-white/[0.015]">
-        <div className="mx-auto grid w-full max-w-[1600px] grid-cols-2 gap-y-10 px-4 py-14 sm:grid-cols-4 sm:px-6 lg:w-4/5">
+      <section className="border-y border-[var(--border)]">
+        <div className="mx-auto grid w-full max-w-[1600px] grid-cols-2 gap-y-14 px-4 py-20 sm:grid-cols-4 sm:px-6 lg:w-4/5">
           {STATS.map((s, i) => (
             <div
               key={s.label}
-              className={`flex flex-col items-center text-center ${
+              className={`px-2 text-center sm:px-6 ${
                 i > 0 ? "sm:border-l sm:border-[var(--border)]" : ""
               }`}
             >
               <StatCounter
                 value={s.value}
                 suffix={s.suffix}
-                className="font-display text-gradient text-4xl font-bold tracking-tight sm:text-5xl"
+                className="font-display text-gradient text-5xl font-bold tracking-[-0.03em] sm:text-6xl"
               />
-              <span className="mt-2 h-0.5 w-8 rounded-full bg-gradient-to-r from-[var(--brand)] to-[var(--success)] opacity-60" />
-              <p className="mt-2 text-xs text-[var(--muted)]">{s.label}</p>
+              <p className="mt-3 text-[13px] tracking-wide text-[var(--muted)]">
+                {s.label}
+              </p>
             </div>
           ))}
         </div>
@@ -204,7 +173,7 @@ export default function Landing() {
           {TRUST.map((t) => (
             <span
               key={t.label}
-              className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/[0.03] px-4 py-2 text-sm font-medium text-[var(--foreground)]/85 transition hover:border-[var(--border-strong)] hover:bg-white/[0.06]"
+              className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--elevate)] px-4 py-2 text-sm font-medium text-[var(--foreground)]/85 transition hover:border-[var(--border-strong)] hover:bg-[var(--elevate)]"
             >
               <span className="text-base">{t.icon}</span>
               {t.label}
@@ -214,7 +183,7 @@ export default function Landing() {
       </section>
 
       {/* ---------- Alternating graphic rows (replaces box grids) ---------- */}
-      <section className="mx-auto w-full max-w-[1600px] space-y-24 px-4 py-20 sm:px-6 lg:w-4/5">
+      <section className="mx-auto w-full max-w-[1600px] space-y-36 px-4 py-28 sm:px-6 lg:w-4/5">
         {/* Row 1 — balance chart */}
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
@@ -222,8 +191,9 @@ export default function Landing() {
               <span className="chip">Your debt-free date</span>
             </Reveal>
             <Reveal delay={90}>
-              <h2 className="font-display mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
-                Watch your balance fall to zero
+              <h2 className="font-display mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+                Watch your balance fall to{" "}
+                <span className="text-gradient">zero</span>
               </h2>
             </Reveal>
             <Reveal delay={180}>
@@ -257,7 +227,7 @@ export default function Landing() {
               <span className="chip">Momentum</span>
             </Reveal>
             <Reveal delay={90}>
-              <h2 className="font-display mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="font-display mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
                 Real progress you can feel
               </h2>
             </Reveal>
@@ -290,7 +260,7 @@ export default function Landing() {
               <span className="chip">Avalanche vs Snowball</span>
             </Reveal>
             <Reveal delay={90}>
-              <h2 className="font-display mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="font-display mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
                 Pick the strategy that saves you more
               </h2>
             </Reveal>
@@ -321,13 +291,13 @@ export default function Landing() {
 
       {/* ---------- How it works (timeline, not boxes) ---------- */}
       <section className="border-y border-[var(--border)]">
-        <div className="mx-auto w-full max-w-[1600px] px-4 py-20 sm:px-6 lg:w-4/5">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-28 sm:px-6 lg:w-4/5">
           <div className="text-center">
             <Reveal className="text-center">
               <span className="chip mx-auto">How it works</span>
             </Reveal>
             <Reveal className="text-center" delay={90}>
-              <h2 className="font-display mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="font-display mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
                 Three steps to a plan you&apos;ll follow
               </h2>
             </Reveal>
@@ -359,8 +329,9 @@ export default function Landing() {
             <span className="chip mx-auto">Loved by planners</span>
           </Reveal>
           <Reveal className="text-center" delay={90}>
-            <h2 className="font-display mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
-              People are getting to zero
+            <h2 className="font-display mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
+              People are getting to{" "}
+              <span className="text-gradient">zero</span>
             </h2>
           </Reveal>
           <Reveal className="text-center" delay={180}>
@@ -374,7 +345,7 @@ export default function Landing() {
             {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
               <figure
                 key={i}
-                className="glass w-[300px] shrink-0 rounded-2xl p-6"
+                className="w-[300px] shrink-0 rounded-2xl border border-[var(--border)] bg-[var(--elevate)] p-6"
               >
                 <div className="text-[var(--accent)]">★★★★★</div>
                 <blockquote className="mt-3 text-sm leading-relaxed text-[var(--foreground)]/90">
@@ -391,13 +362,13 @@ export default function Landing() {
       </section>
 
       {/* ---------- FAQ ---------- */}
-      <section className="mx-auto w-full max-w-[1600px] px-4 py-16 sm:px-6 lg:w-4/5">
+      <section className="mx-auto w-full max-w-[1600px] px-4 py-24 sm:px-6 lg:w-4/5">
         <div className="mb-8 text-center">
           <Reveal className="text-center">
             <span className="chip mx-auto">FAQ</span>
           </Reveal>
           <Reveal className="text-center" delay={90}>
-            <h2 className="font-display mt-5 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="font-display mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
               Questions, answered
             </h2>
           </Reveal>
@@ -406,19 +377,23 @@ export default function Landing() {
       </section>
 
       {/* ---------- CTA ---------- */}
-      <section className="relative py-20">
-        <div className="blob left-1/2 top-1/2 h-72 w-[36rem] -translate-x-1/2 -translate-y-1/2 bg-[#3b5bd0]" />
+      <section className="relative overflow-hidden py-36">
+        {/* atmospheric close */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[30rem] w-[52rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand)]/12 blur-[150px]" />
+        <div className="grid-overlay pointer-events-none absolute inset-0" />
         <div className="relative mx-auto w-full max-w-[1600px] px-4 text-center sm:px-6 lg:w-4/5">
           <Reveal className="text-center">
-            <p className="kicker">Simple pricing</p>
+            <p className="kicker">The last step</p>
           </Reveal>
           <Reveal className="text-center" delay={90}>
-            <h2 className="font-display mx-auto mt-3 max-w-2xl text-3xl font-bold tracking-tight sm:text-5xl">
-              Your debt-free date is closer than you think.
+            <h2 className="font-display mx-auto mt-5 max-w-4xl text-5xl font-bold leading-[0.98] tracking-[-0.035em] sm:text-7xl">
+              Your debt-free date is
+              <br />
+              <span className="text-gradient">closer than you think.</span>
             </h2>
           </Reveal>
           <Reveal className="text-center" delay={180}>
-            <p className="mx-auto mt-4 max-w-xl text-sm text-[var(--muted)]">
+            <p className="mx-auto mt-7 max-w-xl text-base text-[var(--muted)]">
               Start free forever. Ledger Pro unlocks unlimited debts, your full
               schedule, and CSV export for{" "}
               <span className="font-semibold text-[var(--foreground)]">
@@ -429,16 +404,19 @@ export default function Landing() {
             </p>
           </Reveal>
           <Reveal className="text-center" delay={270}>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
               <button
                 onClick={goApp("final_cta")}
-                className="btn-white px-7 py-3 text-sm"
+                className="btn-white group flex items-center gap-1.5 px-8 py-3.5 text-sm"
               >
-                Build my plan →
+                Build my plan
+                <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                  →
+                </span>
               </button>
               <Link
                 href="/pricing"
-                className="rounded-full border border-[var(--border-strong)] px-7 py-3 text-sm font-semibold transition hover:bg-white/5"
+                className="rounded-full border border-[var(--border-strong)] px-8 py-3.5 text-sm font-semibold transition hover:bg-[var(--elevate)]"
               >
                 Compare plans
               </Link>
@@ -469,9 +447,9 @@ export default function Landing() {
             <FooterCol
               title="Learn"
               links={[
-                ["Avalanche vs Snowball", "/#"],
-                ["How it works", "/#"],
-                ["FAQ", "/#"],
+                ["Avalanche vs Snowball", "/avalanche-vs-snowball"],
+                ["How it works", "/how-it-works"],
+                ["FAQ", "/faq"],
               ]}
             />
             <div>
@@ -493,9 +471,17 @@ export default function Landing() {
               </form>
             </div>
           </div>
-          <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-[var(--border)] pt-6 text-xs text-[var(--muted)] sm:flex-row">
+          <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[var(--border)] pt-6 text-xs text-[var(--muted)] sm:flex-row">
             <span>© 2026 Ledger. All rights reserved.</span>
-            <span>Your data stays in your browser.</span>
+            <div className="flex items-center gap-4">
+              <Link href="/privacy" className="hover:text-[var(--foreground)]">
+                Privacy
+              </Link>
+              <Link href="/terms" className="hover:text-[var(--foreground)]">
+                Terms
+              </Link>
+              <span>Private &amp; secure.</span>
+            </div>
           </div>
         </div>
       </footer>

@@ -12,11 +12,11 @@ export function BalanceGraphic({ showLabels = true }: { showLabels?: boolean }) 
       <svg viewBox="0 0 420 260" className="w-full" role="img" aria-label="Balance declining over time">
         <defs>
           <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8fa6ff" stopOpacity="0.35" />
+            <stop offset="0%" stopColor="#a5b4fc" stopOpacity="0.35" />
             <stop offset="100%" stopColor="var(--brand)" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#8fa6ff" />
+            <stop offset="0%" stopColor="#a5b4fc" />
             <stop offset="100%" stopColor="var(--success)" />
           </linearGradient>
           <filter id="balGlowG" x="-20%" y="-40%" width="140%" height="200%">
@@ -24,7 +24,7 @@ export function BalanceGraphic({ showLabels = true }: { showLabels?: boolean }) 
               dx="0"
               dy="6"
               stdDeviation="8"
-              floodColor="#5b7cfa"
+              floodColor="#6366f1"
               floodOpacity="0.35"
             />
           </filter>
@@ -72,13 +72,13 @@ export function BalanceGraphic({ showLabels = true }: { showLabels?: boolean }) 
           strokeWidth="2"
           className="floaty"
         />
-        <circle cx="20" cy="60" r="5" fill="#8fa6ff" />
+        <circle cx="20" cy="60" r="5" fill="#a5b4fc" />
       </svg>
 
       {/* floating labels instead of boxes */}
       {showLabels ? (
         <>
-          <span className="absolute left-2 top-2 rounded-full bg-white/5 px-3 py-1 text-xs text-[var(--muted)] ring-1 ring-white/10">
+          <span className="absolute left-2 top-2 rounded-full bg-[var(--elevate)] px-3 py-1 text-xs text-[var(--muted)] ring-1 ring-[var(--border)]">
             Today
           </span>
           <span className="absolute bottom-8 right-2 rounded-full bg-[var(--success)]/15 px-3 py-1 text-xs font-semibold text-[var(--success)] ring-1 ring-[var(--success)]/30">

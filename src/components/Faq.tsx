@@ -9,11 +9,11 @@ const ITEMS = [
   },
   {
     q: "Do you connect to my bank?",
-    a: "No. You enter your debts manually and everything is calculated on your device. There's no bank linking, no screen-scraping, and nothing to breach.",
+    a: "No. You enter your debts manually — there's no bank linking and no screen-scraping. You stay in control of exactly what Ledger knows.",
   },
   {
     q: "Where is my data stored?",
-    a: "In your browser's local storage — it never leaves your device and is never uploaded to a server. Clearing your browser data or switching devices starts you fresh.",
+    a: "In a secure database, isolated per account so only you can see your debts and payments. We never sell or share it, and you can export or permanently delete everything from Settings at any time.",
   },
   {
     q: "What's the difference between avalanche and snowball?",

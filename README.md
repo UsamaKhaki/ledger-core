@@ -1,62 +1,53 @@
-# Debt Planner 🏔️
+# Ledger — Debt Planner 🪐
 
-A private, browser-based debt payoff planner. List your debts, pick a payoff
-strategy, and see exactly when you'll be debt-free — plus how much interest a
-little extra each month saves you. No signup, no server: everything lives in
-your browser's local storage.
+A private, browser-first debt-payoff planner with a cinematic marketing site.
+List your debts, pick avalanche or snowball, see the exact date you'll be
+debt-free, and track every payment — plus how much interest a little extra each
+month saves you. Free to start, no signup required to use the planner.
+
+## Documentation
+
+- **[CLAUDE.md](./CLAUDE.md)** — quick project guide, commands, conventions, gotchas.
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** — layers, data flow, and extension points.
+- **[docs/API.md](./docs/API.md)** — the ts-rest API reference.
+- **[docs/DESIGN.md](./docs/DESIGN.md)** — the "Gravity → Weightless" design system.
 
 ## Features
 
-- **Add debts** — name, balance, APR, and minimum payment.
-- **Avalanche vs. Snowball** — toggle strategies and see the payoff order.
-  - _Avalanche_: attack the highest interest rate first (saves the most money).
-  - _Snowball_: attack the smallest balance first (fastest wins, best for motivation).
-- **Side-by-side comparison** — see exactly how much money and time Avalanche
-  saves you over Snowball.
-- **Extra-payment slider** — drag it and watch your debt-free date jump earlier
-  and your interest drop.
-- **Payoff summary** — total debt, debt-free date, total interest, and monthly
-  payment at a glance.
-- **Balance-over-time chart** — visualize your journey to $0.
-- **Per-debt payoff dates** — know when each individual debt is cleared.
-- **Private by default** — data is stored only in your browser (localStorage).
+- **Avalanche vs. Snowball** — compare both strategies on your real numbers.
+- **Debt-free date** — a real projected date; an extra-payment slider shows the
+  interest and months you'd save.
+- **Payment tracking** — progress bars, milestone celebrations, per-debt payoff dates.
+- **Amortization schedule + CSV export** (Pro).
+- **14 currencies**, dark cinematic UI with a WebGL hero globe.
+- **Accounts** (prototype) — email/password auth via a typed ts-rest API.
 
 ## Tech stack
 
-- Next.js 16 (App Router) + React 19
-- TypeScript
-- Tailwind CSS v4
-- Recharts
+- Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4
+- Three.js (`@react-three/fiber` + `drei`) · Recharts
+- ts-rest (`@ts-rest/core` + `@ts-rest/serverless`) for the typed API
+- Fonts: Bricolage Grotesque · Geist · Geist Mono
 
 ## Getting started
 
 ```bash
 npm install
-npm run dev
+npm run dev     # http://localhost:3000  (dev is slow — see note)
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Click **Try it with
-sample debts** to see it in action instantly.
+For an accurate feel of performance, use the production build:
 
-## How the math works
+```bash
+npm run build && npm run start
+```
 
-The engine (`src/lib/debt.ts`) simulates month by month: it accrues interest
-(APR compounded monthly), pays every debt's minimum, then pours all remaining
-budget into the target debt for the chosen strategy. As each debt clears, its
-freed-up minimum rolls into the next target (the "snowball" effect). It flags
-plans where the budget can't cover the minimums, or where interest outpaces
-payments.
+## Status & roadmap
 
-> Estimates only. Assumes fixed balances and rates. Not financial advice.
+Planner data is stored in the browser (localStorage). Auth is a **prototype** with
+an in-memory mock provider behind a Supabase-shaped interface — see the swap
+points in `ARCHITECTURE.md`. Next: Supabase (persistence + cloud sync), Stripe
+billing, payment reminders.
 
-## Roadmap ideas
-
-- Log real payments and track progress against the plan
-- Milestone celebrations as each debt clears
-- Optional cloud sync + accounts (database + auth) for multi-device use
-- Reminders / notifications for upcoming payments
-
-## Deploy
-
-This is a static Next.js app — deploy to Vercel with `vercel` (or push to a Git
-repo connected to Vercel). No environment variables or database required.
+> Estimates only. Interest is compounded monthly and assumes fixed balances and
+> rates. Not financial advice.

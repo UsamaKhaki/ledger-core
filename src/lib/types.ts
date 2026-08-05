@@ -1,3 +1,14 @@
+export type DebtKind =
+  | "credit_card"
+  | "store_card"
+  | "personal_loan"
+  | "auto_loan"
+  | "student_loan"
+  | "mortgage"
+  | "medical"
+  | "bnpl"
+  | "other";
+
 export type Debt = {
   id: string;
   name: string;
@@ -5,6 +16,22 @@ export type Debt = {
   startingBalance: number; // what was owed when the debt was first added (for progress)
   apr: number; // annual interest rate as a percent, e.g. 19.99
   minPayment: number; // required minimum monthly payment
+  kind: DebtKind; // what type of debt/card this is
+  issuer?: string | null; // e.g. "Chase", "Emirates NBD"
+  creditLimit?: number | null; // for cards → drives utilization %
+  dueDay?: number | null; // 1–31, day of month the payment is due
+};
+
+/** Shape used to create/update a debt (server assigns id + startingBalance). */
+export type DebtInput = {
+  name: string;
+  kind: DebtKind;
+  issuer?: string | null;
+  balance: number;
+  apr: number;
+  minPayment: number;
+  creditLimit?: number | null;
+  dueDay?: number | null;
 };
 
 export type Payment = {
@@ -16,6 +43,14 @@ export type Payment = {
 };
 
 export type Strategy = "avalanche" | "snowball";
+
+/** Server-stored email notification preferences (per user). */
+export type NotificationPrefs = {
+  emailReminders: boolean;
+  leadDays: number;
+  weeklySummary: boolean;
+  currency: string;
+};
 
 export type MonthRow = {
   month: number; // 1-indexed month number

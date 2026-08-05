@@ -1,67 +1,143 @@
 "use client";
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { LIMITS, type Limits, type Plan } from "./tiers";
 import { useLocalStorage } from "./useLocalStorage";
+import { useAuth } from "./auth/useAuth";
+import { api } from "./api/client";
 import { track } from "./analytics";
 
-type SubscriptionRecord = {
-  plan: Plan;
-  billing?: "monthly" | "yearly";
-  since?: string; // ISO date the plan started
-};
+type Billing = "monthly" | "yearly";
 
 type SubscriptionContextValue = {
   plan: Plan;
   isPro: boolean;
   limits: Limits;
-  billing?: "monthly" | "yearly";
-  /**
-   * Simulated upgrade. In production this is the success handler after a real
-   * Stripe Checkout session completes (or a webhook flips the flag server-side).
-   */
-  upgrade: (billing: "monthly" | "yearly") => void;
-  downgrade: () => void;
+  billing?: Billing | null;
+  status?: string | null;
+  /** True once Stripe is wired up; false means local-simulation mode (dev). */
+  configured: boolean;
   hydrated: boolean;
+  /** Start Checkout (redirects to Stripe) — or flip the local flag in dev. */
+  upgrade: (billing: Billing) => Promise<void>;
+  /** Open the Billing Portal (redirects to Stripe) — or cancel locally in dev. */
+  manage: () => Promise<void>;
+  /** Re-read server subscription state. */
+  refresh: () => Promise<void>;
 };
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
 
-const DEFAULT: SubscriptionRecord = { plan: "free" };
+type LocalSub = { plan: Plan; billing?: Billing };
+const LOCAL_DEFAULT: LocalSub = { plan: "free" };
+
+type ServerState = {
+  configured: boolean;
+  plan: Plan;
+  billing?: Billing | null;
+  status?: string | null;
+};
+const SERVER_DEFAULT: ServerState = {
+  configured: false,
+  plan: "free",
+  billing: null,
+  status: null,
+};
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
+
+  // Local simulation state — only used when Stripe isn't configured.
   const {
-    value: sub,
-    setValue: setSub,
-    hydrated,
-  } = useLocalStorage<SubscriptionRecord>("debtplanner.subscription", DEFAULT);
+    value: local,
+    setValue: setLocal,
+    hydrated: localHydrated,
+  } = useLocalStorage<LocalSub>("debtplanner.subscription", LOCAL_DEFAULT);
+
+  const [server, setServer] = useState<ServerState>(SERVER_DEFAULT);
+  const [loaded, setLoaded] = useState(false);
+
+  const refresh = useCallback(async () => {
+    try {
+      const res = await api.billing.status();
+      if (res.status === 200) {
+        setServer({
+          configured: res.body.configured,
+          plan: res.body.plan,
+          billing: res.body.billing ?? null,
+          status: res.body.status ?? null,
+        });
+      }
+    } catch {
+      // network error — keep whatever we had; stay in free.
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
+
+  // Fetch server state on mount and whenever the signed-in user changes.
+  useEffect(() => {
+    if (authLoading) return;
+    let cancelled = false;
+    (async () => {
+      await refresh();
+      if (cancelled) return;
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading, refresh]);
 
   const value = useMemo<SubscriptionContextValue>(() => {
-    const plan = sub.plan;
+    const configured = server.configured;
+    const plan: Plan = configured ? server.plan : local.plan;
+    const billing = configured ? server.billing : local.billing;
+
     return {
       plan,
       isPro: plan === "pro",
       limits: LIMITS[plan],
-      billing: sub.billing,
-      upgrade: (billing) => {
-        // --- Stripe wiring point -------------------------------------------
-        // Production flow: POST /api/checkout -> redirect to Stripe Checkout,
-        // then on return / webhook set plan to "pro". For the scaffold we flip
-        // the local flag directly so the full Pro experience is testable.
-        setSub({
-          plan: "pro",
-          billing,
-          since: new Date().toISOString(),
-        });
-        track("upgraded", { billing });
+      billing,
+      status: server.status,
+      configured,
+      hydrated: configured ? loaded : localHydrated,
+
+      upgrade: async (b: Billing) => {
+        track("checkout_started", { billing: b });
+        if (!configured) {
+          setLocal({ plan: "pro", billing: b });
+          track("upgraded", { billing: b, simulated: true });
+          return;
+        }
+        const res = await api.billing.checkout({ body: { billing: b } });
+        if (res.status === 200) {
+          window.location.href = res.body.url;
+        }
       },
-      downgrade: () => {
-        setSub({ plan: "free" });
-        track("downgraded");
+
+      manage: async () => {
+        if (!configured) {
+          setLocal({ plan: "free" });
+          track("downgraded", { simulated: true });
+          return;
+        }
+        const res = await api.billing.portal();
+        if (res.status === 200) {
+          window.location.href = res.body.url;
+        }
       },
-      hydrated,
+
+      refresh,
     };
-  }, [sub, setSub, hydrated]);
+  }, [server, local, loaded, localHydrated, setLocal, refresh]);
 
   return (
     <SubscriptionContext.Provider value={value}>

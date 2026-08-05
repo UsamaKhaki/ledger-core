@@ -8,9 +8,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div
-      className={`glass rounded-2xl [box-shadow:var(--shadow)] ${className}`}
-    >
+    <div className={`glass rounded-xl ${className}`}>
       {children}
     </div>
   );

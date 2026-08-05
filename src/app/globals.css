@@ -1,22 +1,47 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Dark navy glassmorphic fintech theme
+   Theming — near-monochrome + one accent, in light & dark.
+   `--elevate` is the subtle overlay used for hovers / faint fills so
+   they flip correctly between themes (white-ish on dark, black-ish on light).
    ============================================================ */
-:root {
-  --background: #0a0f1e;
-  --surface: rgba(255, 255, 255, 0.045); /* glass panel */
-  --surface-solid: #131a2c; /* opaque panels: modals, sticky bars */
-  --foreground: #eef1f8;
-  --muted: #95a1bd;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.2);
-  --brand: #5b7cfa; /* periwinkle blue accent */
-  --brand-soft: rgba(91, 124, 250, 0.16);
-  --success: #45c795;
-  --danger: #f5736f;
-  --accent: #e2b25c; /* warm gold (interest) */
-  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.75);
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #08090a;
+  --surface: rgba(255, 255, 255, 0.022);
+  --surface-solid: #0e0f11;
+  --foreground: #f2f3f5;
+  --muted: #8a8f98;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+  --elevate: rgba(255, 255, 255, 0.05);
+  --brand: #5e6ad2;
+  --brand-soft: rgba(94, 106, 210, 0.15);
+  --success: #4cc38a;
+  --danger: #eb5757;
+  --accent: #d9a83a;
+  --shadow: 0 16px 40px -24px rgba(0, 0, 0, 0.7);
+  --aurora: rgba(94, 106, 210, 0.12);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #fafafb;
+  --surface: rgba(0, 0, 0, 0.022);
+  --surface-solid: #ffffff;
+  --foreground: #16181d;
+  --muted: #5f6673;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.18);
+  --elevate: rgba(0, 0, 0, 0.04);
+  --brand: #4f57c4;
+  --brand-soft: rgba(79, 87, 196, 0.12);
+  --success: #16a34a;
+  --danger: #dc2626;
+  --accent: #b45309;
+  --shadow: 0 14px 40px -22px rgba(15, 20, 40, 0.22);
+  --aurora: rgba(94, 106, 210, 0.1);
 }
 
 @theme inline {
@@ -29,59 +54,63 @@
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-accent: var(--accent);
-  --font-display: var(--font-display);
+  --font-display: var(--font-sans);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 }
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
 }
 
-/* accessibility floor: consistent visible focus */
-:focus-visible {
+/* accessibility floor: visible focus on buttons/links only —
+   inputs/selects/textareas define their own focus ring, so we don't
+   double them up (the outline follows each element's own radius). */
+a:focus-visible,
+button:focus-visible,
+[role="switch"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 body {
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   background-color: var(--background);
-  background-image:
-    radial-gradient(
-      1100px 620px at 72% -8%,
-      rgba(94, 124, 214, 0.28),
-      transparent 60%
-    ),
-    radial-gradient(
-      780px 520px at 6% 8%,
-      rgba(60, 92, 168, 0.16),
-      transparent 55%
-    ),
-    linear-gradient(180deg, #141c33 0%, #0a1020 42%, #070b16 100%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  letter-spacing: -0.006em;
 }
 
-/* ---------- Glass ---------- */
-.glass {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.02)
+/* Atmosphere on a single FIXED, composited layer (no background-attachment:fixed,
+   which repaints on every scroll frame). Painted once, cheap to scroll over. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    1100px 620px at 82% -10%,
+    var(--aurora),
+    transparent 60%
   );
+}
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Surface (flat, subtle — not glassy) ---------- */
+.glass {
+  background: var(--surface);
   border: 1px solid var(--border);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 
 /* ---------- Typography utilities ---------- */
 .font-display {
   font-family: var(--font-display), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.022em;
 }
 
 .font-mono-num {
@@ -91,30 +120,33 @@ body {
 }
 
 .kicker {
-  font-family: var(--font-mono), ui-monospace, monospace;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  font-weight: 500;
   color: var(--muted);
 }
 
-/* frosted chip (e.g. "256-bit encryption" style pill) */
+/* subtle tag pill */
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px);
+  background: var(--elevate);
   border-radius: 999px;
-  padding: 0.35rem 0.75rem;
+  padding: 0.3rem 0.7rem;
   font-size: 0.75rem;
   color: var(--muted);
 }
 
-/* gradient headline text */
+/* headline sheen — derived from the foreground so it works in both themes */
 .text-gradient {
-  background: linear-gradient(120deg, #ffffff 0%, #b9c6ff 55%, #7d97ff 100%);
+  background: linear-gradient(
+    180deg,
+    var(--foreground) 0%,
+    color-mix(in srgb, var(--foreground) 62%, transparent) 130%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -138,22 +170,39 @@ body {
     box-shadow 0.3s;
 }
 .card-hover:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   border-color: var(--border-strong);
-  box-shadow: 0 28px 70px -30px rgba(0, 0, 0, 0.9);
+  background: var(--elevate);
 }
 
 /* brand glow (featured elements) */
 .glow-brand {
   box-shadow:
     0 0 0 1px var(--brand-soft),
-    0 30px 80px -30px rgba(91, 124, 250, 0.45);
+    0 24px 60px -34px rgba(94, 106, 210, 0.3);
 }
 
-/* white pill CTA (marketing) */
+/* top navigation bar — transparent at rest, condenses on scroll */
+.site-nav {
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.site-nav.is-scrolled {
+  background: color-mix(in srgb, var(--background) 78%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom-color: var(--border);
+  box-shadow: 0 12px 30px -24px rgba(0, 0, 0, 0.4);
+}
+
+/* high-contrast pill CTA — inverts per theme (white on dark, dark on light) */
 .btn-white {
-  background: #ffffff;
-  color: #0a0f1e;
+  background: var(--foreground);
+  color: var(--background);
   border-radius: 999px;
   font-weight: 600;
   transition: opacity 0.2s, transform 0.1s;
@@ -395,9 +444,38 @@ body {
   }
 }
 
+/* Skeleton shimmer — a highlight band sweeping across an --elevate base.
+   Theme-aware: the band is derived from --foreground so it reads in both modes. */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--elevate);
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--elevate), var(--foreground) 16%) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .confetti-piece {
     display: none;
+  }
+  .shimmer::after {
+    animation: none;
   }
   .reveal,
   .hero-in,

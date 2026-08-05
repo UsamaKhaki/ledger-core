@@ -13,20 +13,19 @@ import {
 import { Card } from "@/components/ui";
 
 export default function PricingPage() {
-  const { isPro, upgrade, downgrade, billing } = useSubscription();
+  const { isPro, upgrade, manage, billing, configured } = useSubscription();
   const [cycle, setCycle] = useState<"monthly" | "yearly">("yearly");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     track("view_pricing");
   }, []);
 
-  function startCheckout() {
-    // --- Stripe wiring point ---------------------------------------------
-    // Production: POST to /api/checkout to create a Stripe Checkout Session for
-    // the chosen price, then redirect to session.url. On success/webhook the
-    // plan flips to "pro". For the scaffold we upgrade locally right away.
-    track("checkout_started", { cycle });
-    upgrade(cycle);
+  async function startCheckout() {
+    // Redirects to Stripe Checkout when configured; flips the local flag in dev.
+    setBusy(true);
+    await upgrade(cycle);
+    setBusy(false);
   }
 
   const price = cycle === "yearly" ? yearlyMonthlyEquivalent : PRICING.monthlyPrice;
@@ -94,10 +93,10 @@ export default function PricingPage() {
           </ul>
           {isPro ? (
             <button
-              onClick={downgrade}
+              onClick={() => manage()}
               className="mt-6 rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--background)]"
             >
-              Switch to Free
+              {configured ? "Manage plan" : "Switch to Free"}
             </button>
           ) : (
             <Link
@@ -149,9 +148,10 @@ export default function PricingPage() {
           ) : (
             <button
               onClick={startCheckout}
-              className="mt-6 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.99]"
+              disabled={busy}
+              className="mt-6 rounded-xl bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 active:scale-[0.99] disabled:opacity-60"
             >
-              Upgrade to Pro
+              {busy ? "Starting checkout…" : "Upgrade to Pro"}
             </button>
           )}
         </Card>
@@ -196,8 +196,11 @@ export default function PricingPage() {
       </div>
 
       <p className="mx-auto mt-8 max-w-xl text-center text-xs text-[var(--muted)]">
-        Prices in USD. This is a demo checkout — no real payment is taken. Cancel
-        anytime; downgrading keeps your data on the free plan.
+        Prices in USD.{" "}
+        {configured
+          ? "Secure checkout and billing handled by Stripe."
+          : "Demo mode — no real payment is taken."}{" "}
+        Cancel anytime; your data stays on the free plan.
       </p>
     </main>
   );

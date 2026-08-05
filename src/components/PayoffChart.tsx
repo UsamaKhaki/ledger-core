@@ -45,12 +45,12 @@ export function PayoffChart({ plan }: { plan: PlanResult }) {
           <AreaChart data={data} margin={{ top: 8, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="balFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8fa6ff" stopOpacity={0.35} />
+                <stop offset="0%" stopColor="#a5b4fc" stopOpacity={0.35} />
                 <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
               </linearGradient>
               {/* line: blue → green, echoing the graphics */}
               <linearGradient id="balStroke" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#8fa6ff" />
+                <stop offset="0%" stopColor="#a5b4fc" />
                 <stop offset="100%" stopColor="var(--success)" />
               </linearGradient>
               <filter id="balGlow" x="-20%" y="-40%" width="140%" height="180%">
@@ -58,7 +58,7 @@ export function PayoffChart({ plan }: { plan: PlanResult }) {
                   dx="0"
                   dy="6"
                   stdDeviation="8"
-                  floodColor="#5b7cfa"
+                  floodColor="#6366f1"
                   floodOpacity="0.35"
                 />
               </filter>

@@ -15,12 +15,16 @@ export type AnalyticsEvent =
   | "downgraded"
   | "export_csv";
 
+import { hasAnalyticsConsent } from "./consent";
+
 export function track(event: AnalyticsEvent, props?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  // TODO: forward to your analytics provider, e.g.
-  //   posthog.capture(event, props)
-  //   window.va?.("event", { name: event, ...props })
   if (process.env.NODE_ENV !== "production") {
     console.debug(`[analytics] ${event}`, props ?? {});
   }
+  // Non-essential analytics only fire after the user accepts cookies.
+  if (!hasAnalyticsConsent()) return;
+  // TODO: forward to your analytics provider, e.g.
+  //   posthog.capture(event, props)
+  //   window.va?.("event", { name: event, ...props })
 }
