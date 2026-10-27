@@ -38,8 +38,16 @@ yarn-error.log*
 .env.*
 !.env.example
 
-# local editor / agent config
+# AI assistant / editor config (kept local, never published)
 .claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.cursor/
+.cursorrules
+.windsurfrules
+.github/copilot-instructions.md
+.aider*
 
 # typescript
 *.tsbuildinfo

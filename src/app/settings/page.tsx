@@ -132,7 +132,7 @@ export default function SettingsPage() {
   }
 
   return (
-    /* Standard page container (CLAUDE.md: one container for every route);
+    /* Standard page container (docs/DESIGN.md: one container for every route);
        the settings rows are narrowed inside it, not by shrinking the page. */
     <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 sm:py-10 lg:w-4/5">
       <div className="mx-auto w-full max-w-4xl">

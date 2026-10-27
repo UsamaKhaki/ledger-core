@@ -47,6 +47,15 @@ never `background-attachment: fixed` (that repaints every scroll frame).
 `rounded-full` pills/chips/toggles · `rounded-xl` inputs/buttons/inner tiles ·
 `rounded-2xl` cards/modals · `rounded-3xl` the single hero CTA panel.
 
+## Page width
+
+Every product route (`/app`, `/app/debt/[id]`, `/settings`, `/pricing`) uses one
+container on its top-level `<main>`:
+`mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 sm:py-10 lg:w-4/5`.
+Narrow the content inside it (as `/settings` does), never the `<main>` itself.
+Two exceptions: prose pages (FAQ, guides, legal) use `max-w-3xl` for a readable
+line length, and auth pages center a single narrow card.
+
 ## Rules of thumb
 
 - New colors → add a token, don't hardcode hex (decorative WebGL/gradient stops excepted).
