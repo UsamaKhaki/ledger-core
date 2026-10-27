@@ -58,15 +58,15 @@ Resolve the current session user.
 
 ```bash
 # signup (stores the session cookie in cj.txt)
-curl -c cj.txt -X POST localhost:3000/api/auth/signup \
+curl -c cj.txt -X POST localhost:6101/api/auth/signup \
   -H 'Content-Type: application/json' \
   -d '{"email":"a@b.co","password":"secret123","name":"Ada"}'
 
 # who am I (send the cookie)
-curl -b cj.txt localhost:3000/api/auth/me
+curl -b cj.txt localhost:6101/api/auth/me
 
 # logout
-curl -b cj.txt -c cj.txt -X POST localhost:3000/api/auth/logout
+curl -b cj.txt -c cj.txt -X POST localhost:6101/api/auth/logout
 ```
 
 ## Debts — `api.debts.*`

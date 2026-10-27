@@ -77,7 +77,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. With no env vars set, you can sign in with the
+Open http://localhost:6101. With no env vars set, you can sign in with the
 seeded demo account `demo@ledger.app` / `password123` (local mock only).
 
 ### Environment variables
