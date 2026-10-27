@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Modal } from "./Modal";
 import type { Debt } from "@/lib/types";
 import { useMoney } from "@/lib/CurrencyContext";
 
@@ -20,15 +21,6 @@ export function LogPaymentModal({
   );
   const [error, setError] = useState<string | null>(null);
 
-  // Close on Escape.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const value = parseFloat(amount);
@@ -40,15 +32,12 @@ export function LogPaymentModal({
     "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[15px] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="font-display text-xl font-semibold">Log a payment</h3>
+    <Modal onClose={onClose} panelClassName="w-full max-w-sm p-5">
+      {({ titleId }) => (
+        <>
+        <h3 id={titleId} className="font-display text-xl font-semibold">
+          Log a payment
+        </h3>
         <p className="mt-0.5 text-sm text-[var(--muted)]">
           {debt.name} ·{" "}
           <span className="font-mono-num">{format(debt.balance)}</span> remaining
@@ -108,7 +97,8 @@ export function LogPaymentModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+        </>
+      )}
+    </Modal>
   );
 }

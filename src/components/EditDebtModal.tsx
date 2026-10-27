@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Modal } from "./Modal";
 import type { Debt, DebtKind } from "@/lib/types";
 import { DEBT_KINDS, isCardKind } from "@/lib/cards";
 import { useMoney } from "@/lib/CurrencyContext";
@@ -30,12 +31,6 @@ export function EditDebtModal({
   const [minPayment, setMinPayment] = useState(String(debt.minPayment));
   const [dueDay, setDueDay] = useState(debt.dueDay != null ? String(debt.dueDay) : "");
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,15 +66,13 @@ export function EditDebtModal({
   const showLimit = isCardKind(kind);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-5 [box-shadow:var(--shadow)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="font-display text-xl font-semibold tracking-tight">
+    <Modal onClose={onClose} panelClassName="w-full max-w-lg p-5">
+      {({ titleId }) => (
+        <>
+        <h3
+          id={titleId}
+          className="font-display text-xl font-semibold tracking-tight"
+        >
           Edit
         </h3>
         <p className="mt-0.5 text-sm text-[var(--muted)]">
@@ -224,7 +217,8 @@ export function EditDebtModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+        </>
+      )}
+    </Modal>
   );
 }

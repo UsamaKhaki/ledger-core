@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Modal } from "./Modal";
 import Link from "next/link";
 import { track } from "@/lib/analytics";
 import {
@@ -24,27 +24,18 @@ export function UpgradeModal({
   reason: string | null;
   onClose: () => void;
 }) {
-  useEffect(() => {
-    if (!reason) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [reason, onClose]);
-
   if (!reason) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-4 sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] [box-shadow:var(--shadow)]"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} panelClassName="w-full max-w-md overflow-hidden">
+      {({ titleId }) => (
+        <>
         <div className="border-b border-[var(--border)] bg-[var(--brand-soft)]/50 px-6 py-5">
           <p className="kicker !text-[var(--brand)]">Ledger Pro</p>
-          <h3 className="font-display mt-1 text-2xl font-semibold tracking-tight">
+          <h3
+            id={titleId}
+            className="font-display mt-1 text-2xl font-semibold tracking-tight"
+          >
             Go Pro to keep going
           </h3>
           <p className="mt-1 text-sm text-[var(--muted)]">{reason}</p>
@@ -86,7 +77,8 @@ export function UpgradeModal({
             </Link>
           </div>
         </div>
-      </div>
-    </div>
+        </>
+      )}
+    </Modal>
   );
 }

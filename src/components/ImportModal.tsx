@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { Modal } from "./Modal";
 import type { DebtInput } from "@/lib/types";
 import { kindMeta } from "@/lib/cards";
 import { useMoney } from "@/lib/CurrencyContext";
@@ -21,12 +22,6 @@ export function ImportModal({
   const [result, setResult] = useState<{ added: number; skipped: number } | null>(
     null,
   );
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const rows = useMemo(() => parseCSV(text), [text]);
   const valid = rows.filter((r) => !r.error);
@@ -62,20 +57,18 @@ export function ImportModal({
     "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20 placeholder:text-[var(--muted)]";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-5 [box-shadow:var(--shadow)]"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} panelClassName="w-full max-w-2xl p-5">
+      {({ titleId }) => (
+        <>
         {result ? (
           <div className="text-center">
             <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--success)]/10 text-2xl">
               ✓
             </span>
-            <h3 className="font-display text-xl font-semibold tracking-tight">
+            <h3
+              id={titleId}
+              className="font-display text-xl font-semibold tracking-tight"
+            >
               Imported {result.added} account{result.added === 1 ? "" : "s"}
             </h3>
             {result.skipped > 0 ? (
@@ -95,7 +88,10 @@ export function ImportModal({
           <>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="font-display text-xl font-semibold tracking-tight">
+                <h3
+                  id={titleId}
+                  className="font-display text-xl font-semibold tracking-tight"
+                >
                   Import accounts
                 </h3>
                 <p className="mt-0.5 text-sm text-[var(--muted)]">
@@ -209,7 +205,8 @@ export function ImportModal({
             </div>
           </>
         )}
-      </div>
-    </div>
+        </>
+      )}
+    </Modal>
   );
 }
