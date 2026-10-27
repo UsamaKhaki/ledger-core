@@ -38,7 +38,7 @@ yarn-error.log*
 .env.*
 !.env.example
 
-# AI assistant / editor config (kept local, never published)
+# local editor and tool config (never published)
 .claude/
 CLAUDE.md
 CLAUDE.local.md
