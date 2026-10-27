@@ -13,7 +13,7 @@ const PRO_PERKS = [
   "Track unlimited debts",
   "Full month-by-month amortization schedule",
   "Export your plan to CSV",
-  "Payment reminders & cloud sync (coming soon)",
+  "Email payment reminders and a weekly progress email",
   "Priority support",
 ];
 

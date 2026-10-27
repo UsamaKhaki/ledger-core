@@ -296,6 +296,7 @@ export default function SettingsPage() {
                 <button
                   key={c.code}
                   onClick={() => setCurrency(c.code)}
+                  aria-pressed={active}
                   className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition ${
                     active
                       ? "border-[var(--brand)] bg-[var(--brand)]/10"
@@ -364,14 +365,14 @@ export default function SettingsPage() {
               <div className="min-w-0">
                 <p className="text-sm font-medium">Browser reminders</p>
                 <p className="mt-0.5 text-xs text-[var(--muted)]">
-                  Notifications for due dates while Ledger is open. Email
-                  reminders are coming soon.
+                  Notifications for due dates while Ledger is open.
                 </p>
               </div>
               <button
                 onClick={toggleReminders}
                 role="switch"
                 aria-checked={reminders.enabled}
+                aria-label="Toggle browser reminders"
                 className={`relative h-6 w-11 shrink-0 rounded-full transition ${
                   reminders.enabled ? "bg-[var(--brand)]" : "bg-[var(--border)]"
                 }`}
