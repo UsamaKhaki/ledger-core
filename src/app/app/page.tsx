@@ -50,9 +50,10 @@ export default function PlannerPage() {
     debts,
     payments,
     loading,
+    loadError,
     addDebt: apiAddDebt,
     saveDebt: apiSaveDebt,
-    clearAll,
+    clearAll: apiClearAll,
     logPayment: apiLogPayment,
   } = useDebtsData();
 
@@ -157,7 +158,7 @@ export default function PlannerPage() {
     );
   }
   async function saveDebt(updated: Debt) {
-    await apiSaveDebt(updated.id, {
+    const res = await apiSaveDebt(updated.id, {
       name: updated.name,
       kind: updated.kind,
       issuer: updated.issuer,
@@ -167,13 +168,28 @@ export default function PlannerPage() {
       creditLimit: updated.creditLimit,
       dueDay: updated.dueDay,
     });
+    if (res.error) {
+      setDataError(res.error);
+      return;
+    }
+    setDataError(null);
     setEditingDebt(null);
+  }
+
+  async function clearAll() {
+    const res = await apiClearAll();
+    if (res.error) setDataError(res.error);
   }
 
   async function logPayment(debtId: string, amount: number) {
     setPayingDebt(null);
     const res = await apiLogPayment(debtId, amount);
-    if (!res.ok || !res.cleared) return;
+    if (!res.ok) {
+      setDataError(res.error);
+      return;
+    }
+    setDataError(null);
+    if (!res.cleared) return;
 
     const allCleared = debts.every((d) =>
       d.id === res.debt.id ? true : d.balance <= 0.005,
@@ -237,15 +253,18 @@ export default function PlannerPage() {
         />
       ) : null}
 
-      {dataError ? (
-        <div className="mx-auto mb-6 max-w-2xl rounded-xl border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
-          {dataError}
+      {dataError || loadError ? (
+        <div
+          role="alert"
+          className="mx-auto mb-6 max-w-2xl rounded-xl border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]"
+        >
+          {dataError ?? loadError}
         </div>
       ) : null}
 
       {loading ? (
         <DashboardSkeleton />
-      ) : !hasDebts ? (
+      ) : loadError ? null : !hasDebts ? (
         <div className="reveal mx-auto max-w-2xl py-10 text-center sm:py-16">
           <p className="kicker">A calm plan to reach zero</p>
           <h1 className="font-display mt-4 text-4xl font-bold tracking-tight sm:text-5xl">

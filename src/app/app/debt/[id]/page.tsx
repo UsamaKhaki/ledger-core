@@ -248,10 +248,15 @@ export default function CardDetailPage() {
               </button>
               <button
                 onClick={async () => {
-                  if (confirm(`Remove ${debt.name}?`)) {
-                    await removeDebt(debt.id);
-                    router.push("/app");
+                  if (!confirm(`Remove ${debt.name}?`)) return;
+                  const res = await removeDebt(debt.id);
+                  // Only leave the page once the server confirms the delete —
+                  // otherwise we'd navigate away from a debt that still exists.
+                  if (res.error) {
+                    alert(res.error);
+                    return;
                   }
+                  router.push("/app");
                 }}
                 className="rounded-xl border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--muted)] transition hover:border-[var(--danger)] hover:text-[var(--danger)]"
               >
