@@ -96,9 +96,15 @@ body::before {
     transparent 60%
   );
 }
-body > * {
-  position: relative;
-  z-index: 1;
+/* Lift page content above the fixed `body::before` atmosphere layer (z-index 0).
+   Kept in `@layer base` so Tailwind utilities — `fixed`, `sticky`, `z-*` on a
+   direct child of <body>, e.g. the cookie banner — still win. Unlayered, this
+   rule would beat every utility regardless of specificity. */
+@layer base {
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 /* ---------- Surface (flat, subtle — not glassy) ---------- */

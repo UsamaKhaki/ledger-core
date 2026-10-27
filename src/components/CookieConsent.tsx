@@ -17,7 +17,7 @@ export function CookieConsent() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="rise fixed bottom-4 left-4 right-4 z-[60] mx-auto max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-4 [box-shadow:var(--shadow)] sm:left-6 sm:right-auto"
+      className="hero-in fixed bottom-4 left-4 right-4 z-[60] mx-auto max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)] p-4 [box-shadow:var(--shadow)] sm:left-6 sm:right-auto"
     >
       <p className="text-sm font-semibold">Cookies</p>
       <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
