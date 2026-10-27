@@ -34,18 +34,47 @@ function toPayment(r: any): Payment {
 
 const supa = isSupabaseConfigured();
 
+/**
+ * The fixture store is a SINGLE shared dataset with no per-user scoping — every
+ * visitor would see and mutate the same debts. That is fine locally, and a data
+ * leak in production. Fail loudly instead of serving one user's debts to
+ * another. Set ALLOW_MOCK_DATA=true to opt in deliberately (e.g. a demo build).
+ */
+function assertBackend(): void {
+  if (supa) return;
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_MOCK_DATA !== "true"
+  ) {
+    throw new Error(
+      "No database configured. Set NEXT_PUBLIC_SUPABASE_URL and " +
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY, or set ALLOW_MOCK_DATA=true to run on " +
+        "the shared in-memory fixtures (never with real users).",
+    );
+  }
+}
+
+/** Supabase errors must surface, not read as "you have no debts". */
+function raise(op: string, error: { message: string } | null): void {
+  if (!error) return;
+  throw new Error(`[data.${op}] ${error.message}`);
+}
+
 export const data = {
   async listDebts(): Promise<Debt[]> {
+    assertBackend();
     if (!supa) return store.listDebts();
     const sb = await supabaseServer();
-    const { data: rows } = await sb
+    const { data: rows, error } = await sb
       .from("debts")
       .select("*")
       .order("created_at", { ascending: true });
+    raise("listDebts", error);
     return (rows ?? []).map(toDebt);
   },
 
   async createDebt(input: DebtInput): Promise<Debt | null> {
+    assertBackend();
     if (!supa) return store.createDebt(input);
     const sb = await supabaseServer();
     const { data: row, error } = await sb
@@ -68,6 +97,7 @@ export const data = {
   },
 
   async updateDebt(id: string, patch: Partial<DebtInput>): Promise<Debt | null> {
+    assertBackend();
     if (!supa) return store.updateDebt(id, patch);
     const sb = await supabaseServer();
 
@@ -103,6 +133,7 @@ export const data = {
   },
 
   async removeDebt(id: string): Promise<boolean> {
+    assertBackend();
     if (!supa) return store.removeDebt(id);
     const sb = await supabaseServer();
     const { error } = await sb.from("debts").delete().eq("id", id);
@@ -110,6 +141,7 @@ export const data = {
   },
 
   async clear(): Promise<void> {
+    assertBackend();
     if (!supa) return store.clear();
     const sb = await supabaseServer();
     const { data: auth } = await sb.auth.getUser();
@@ -117,12 +149,14 @@ export const data = {
   },
 
   async listPayments(): Promise<Payment[]> {
+    assertBackend();
     if (!supa) return store.listPayments();
     const sb = await supabaseServer();
-    const { data: rows } = await sb
+    const { data: rows, error } = await sb
       .from("payments")
       .select("*")
       .order("paid_at", { ascending: false });
+    raise("listPayments", error);
     return (rows ?? []).map(toPayment);
   },
 
@@ -130,6 +164,7 @@ export const data = {
     debtId: string,
     amount: number,
   ): Promise<{ payment: Payment; debt: Debt; cleared: boolean } | null> {
+    assertBackend();
     if (!supa) return store.logPayment(debtId, amount);
     const sb = await supabaseServer();
 

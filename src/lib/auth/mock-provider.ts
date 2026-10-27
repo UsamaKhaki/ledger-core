@@ -19,9 +19,26 @@ const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 type UserRecord = AuthUser & { salt: string; hash: string };
 
-// NOTE: module-level state — single-process only. Real persistence comes with Supabase.
-const usersByEmail = new Map<string, UserRecord>();
-const sessionsByToken = new Map<string, string>(); // token -> email
+// State must live on `globalThis`, NOT in module scope. Next bundles route
+// handlers and Server Components into separate module graphs, so a module-level
+// Map is instantiated once per graph: a session written by POST /api/auth/login
+// would be invisible to the `/app` server layout, and the dashboard would
+// redirect to /login forever. One object on the global keeps every bundle —
+// and every dev hot-reload — pointing at the same store.
+//
+// Single-process only either way. Real persistence comes with Supabase.
+type MockState = {
+  usersByEmail: Map<string, UserRecord>;
+  sessionsByToken: Map<string, string>; // token -> email
+};
+const globalStore = globalThis as typeof globalThis & {
+  __ledgerMockAuth?: MockState;
+};
+const state: MockState = (globalStore.__ledgerMockAuth ??= {
+  usersByEmail: new Map(),
+  sessionsByToken: new Map(),
+});
+const { usersByEmail, sessionsByToken } = state;
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -33,6 +50,7 @@ function hashPassword(password: string, salt: string): string {
 // (The store is in-memory and resets on server restart, so we re-seed here.)
 (function seedDemoUser() {
   const email = "demo@ledger.app";
+  if (usersByEmail.has(email)) return; // shared store — only seed once
   const password = "password123";
   const salt = randomBytes(16).toString("hex");
   usersByEmail.set(email, {

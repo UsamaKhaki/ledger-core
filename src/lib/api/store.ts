@@ -9,14 +9,23 @@ import { randomBytes } from "node:crypto";
 import type { Debt, DebtInput, Payment } from "@/lib/types";
 import { FIXTURE_DEBTS, FIXTURE_PAYMENTS } from "./fixtures";
 
-let debts: Debt[] = FIXTURE_DEBTS.map((d) => ({ ...d }));
-let payments: Payment[] = FIXTURE_PAYMENTS.map((p) => ({ ...p }));
+// Same reason as the mock auth provider: module-level state is duplicated
+// across Next's separate server bundles, so a debt written through the API
+// route wouldn't be visible to a Server Component. Keep one copy on the global.
+type StoreState = { debts: Debt[]; payments: Payment[] };
+const globalStore = globalThis as typeof globalThis & {
+  __ledgerMockStore?: StoreState;
+};
+const state: StoreState = (globalStore.__ledgerMockStore ??= {
+  debts: FIXTURE_DEBTS.map((d) => ({ ...d })),
+  payments: FIXTURE_PAYMENTS.map((p) => ({ ...p })),
+});
 
 const id = (prefix: string) => `${prefix}_${randomBytes(6).toString("hex")}`;
 
 export const store = {
   listDebts(): Debt[] {
-    return debts.map((d) => ({ ...d }));
+    return state.debts.map((d) => ({ ...d }));
   },
 
   createDebt(input: DebtInput): Debt {
@@ -32,12 +41,12 @@ export const store = {
       creditLimit: input.creditLimit ?? null,
       dueDay: input.dueDay ?? null,
     };
-    debts.push(debt);
+    state.debts.push(debt);
     return { ...debt };
   },
 
   updateDebt(debtId: string, patch: Partial<DebtInput>): Debt | null {
-    const d = debts.find((x) => x.id === debtId);
+    const d = state.debts.find((x) => x.id === debtId);
     if (!d) return null;
     if (patch.name !== undefined) d.name = patch.name;
     if (patch.kind !== undefined) d.kind = patch.kind;
@@ -55,26 +64,26 @@ export const store = {
   },
 
   removeDebt(debtId: string): boolean {
-    const before = debts.length;
-    debts = debts.filter((d) => d.id !== debtId);
-    payments = payments.filter((p) => p.debtId !== debtId);
-    return debts.length < before;
+    const before = state.debts.length;
+    state.debts = state.debts.filter((d) => d.id !== debtId);
+    state.payments = state.payments.filter((p) => p.debtId !== debtId);
+    return state.debts.length < before;
   },
 
   clear(): void {
-    debts = [];
-    payments = [];
+    state.debts = [];
+    state.payments = [];
   },
 
   listPayments(): Payment[] {
-    return payments.map((p) => ({ ...p }));
+    return state.payments.map((p) => ({ ...p }));
   },
 
   logPayment(
     debtId: string,
     amount: number,
   ): { payment: Payment; debt: Debt; cleared: boolean } | null {
-    const d = debts.find((x) => x.id === debtId);
+    const d = state.debts.find((x) => x.id === debtId);
     if (!d) return null;
     const newBalance = Math.max(0, d.balance - amount);
     const cleared = d.balance > 0.005 && newBalance <= 0.005;
@@ -86,7 +95,7 @@ export const store = {
       dateISO: new Date().toISOString(),
       clearedDebt: cleared,
     };
-    payments.unshift(payment);
+    state.payments.unshift(payment);
     return { payment: { ...payment }, debt: { ...d }, cleared };
   },
 };
