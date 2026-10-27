@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/useAuth";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
-  const router = useRouter();
   const { login, signup, resendConfirmation } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,6 +37,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     return next && next.startsWith("/") && !next.startsWith("//") ? next : "/app";
   }
 
+  // A full navigation, not router.push: the header's links prefetch /app while
+  // signed out, and push would replay that cached redirect back to /login.
+  function enterApp() {
+    window.location.assign(destination());
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -48,13 +52,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       setBusy(false);
       if (res.error) return setError(res.error);
       if (res.pending) return setSent(true);
-      router.push(destination());
+      enterApp();
       return;
     }
     const res = await login(email, password);
     setBusy(false);
     if (res.error) return setError(res.error);
-    router.push(destination());
+    enterApp();
   }
 
   async function resend() {
