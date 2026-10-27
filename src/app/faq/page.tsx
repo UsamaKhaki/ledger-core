@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Faq } from "@/components/Faq";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/faq" },
   title: "FAQ",
   description:
     "Answers to common questions about Ledger — pricing, privacy, how your data is stored, strategies, and cancelling Pro.",

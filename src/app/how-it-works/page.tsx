@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/how-it-works" },
   title: "How it works",
   description:
     "See how Ledger turns your debts into one clear payoff plan — add your balances, pick a strategy, get your debt-free date, and track every payment.",

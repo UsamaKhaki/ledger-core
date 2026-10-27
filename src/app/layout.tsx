@@ -42,7 +42,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Ledger" }],
   creator: "Ledger",
-  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     siteName: "Ledger",

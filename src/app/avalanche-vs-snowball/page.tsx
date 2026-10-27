@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/avalanche-vs-snowball" },
   title: "Avalanche vs. Snowball",
   description:
     "Debt avalanche vs. debt snowball, explained simply. See how each method works, which saves more interest, which keeps you motivated, and how to choose.",

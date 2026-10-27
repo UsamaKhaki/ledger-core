@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage, Section } from "@/components/LegalPage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/privacy" },
   title: "Privacy Policy",
   description: "How Ledger collects, uses, stores, and protects your data.",
 };

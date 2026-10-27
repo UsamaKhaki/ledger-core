@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage, Section } from "@/components/LegalPage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/terms" },
   title: "Terms of Service",
   description: "The terms that govern your use of Ledger.",
 };
