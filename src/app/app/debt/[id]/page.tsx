@@ -81,19 +81,21 @@ function Gauge({
   );
 }
 
+const STAT_DIVIDER = "sm:border-l sm:border-[var(--border)] sm:pl-5";
+
 function Stat({
   label,
   value,
   sub,
-  divide,
+  className,
 }: {
   label: string;
   value: string;
   sub?: string;
-  divide?: boolean;
+  className?: string;
 }) {
   return (
-    <div className={divide ? "sm:border-l sm:border-[var(--border)] sm:pl-5" : ""}>
+    <div className={className}>
       <dt className="kicker">{label}</dt>
       <dd className="font-display mt-1.5 text-xl font-bold tracking-tight [overflow-wrap:anywhere]">
         {value}
@@ -265,9 +267,25 @@ export default function CardDetailPage() {
             </div>
           </div>
 
-          <dl className="mt-7 grid grid-cols-2 gap-y-6 border-t border-[var(--border)] pt-6 sm:grid-cols-4">
+          {/* Beside the card face (lg) four columns leave ~60px per figure, so
+              wrap to 2x2 there and the third stat starts a row: no divider. */}
+          <dl
+            className={`mt-7 grid grid-cols-2 gap-y-6 border-t border-[var(--border)] pt-6 sm:grid-cols-4 ${
+              isCard ? "lg:grid-cols-2 xl:grid-cols-4" : ""
+            }`}
+          >
             {heroStats.map((s, i) => (
-              <Stat key={s.label} {...s} divide={i > 0} />
+              <Stat
+                key={s.label}
+                {...s}
+                className={
+                  i === 0
+                    ? ""
+                    : i === 2 && isCard
+                      ? `${STAT_DIVIDER} lg:border-l-0 lg:pl-0 xl:border-l xl:pl-5`
+                      : STAT_DIVIDER
+                }
+              />
             ))}
           </dl>
         </div>

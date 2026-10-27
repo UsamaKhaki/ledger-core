@@ -39,7 +39,7 @@ export type Stat = {
 /** Borderless, hairline-divided row of key figures (less boxy than cards). */
 export function StatStrip({ stats }: { stats: Stat[] }) {
   return (
-    <div className="grid grid-cols-2 gap-y-5 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-y-5 lg:grid-cols-4">
       {stats.map((s, i) => {
         const accent = s.accent ?? "brand";
         return (
@@ -47,7 +47,7 @@ export function StatStrip({ stats }: { stats: Stat[] }) {
             key={s.label}
             className={`min-w-0 px-1 sm:px-5 ${
               i % 2 === 1 ? "border-l border-[var(--border)] pl-4 sm:pl-5" : ""
-            } ${i > 0 ? "sm:border-l sm:border-[var(--border)]" : ""}`}
+            } ${i > 0 ? "lg:border-l lg:border-[var(--border)]" : ""}`}
           >
             <div className="flex items-center gap-1.5">
               <span
@@ -56,7 +56,7 @@ export function StatStrip({ stats }: { stats: Stat[] }) {
               <span className="kicker truncate">{s.label}</span>
             </div>
             <p
-              className={`font-display mt-2 text-2xl font-bold tracking-tight [overflow-wrap:anywhere] sm:text-3xl ${ACCENT_TEXT[accent]}`}
+              className={`font-display mt-2 text-2xl font-bold tracking-tight [overflow-wrap:anywhere] xl:text-3xl ${ACCENT_TEXT[accent]}`}
             >
               {s.value}
             </p>
