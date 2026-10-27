@@ -23,7 +23,7 @@ never `background-attachment: fixed` (that repaints every scroll frame).
 
 ## Type
 
-- **Display:** Bricolage Grotesque (`.font-display`, tight tracking) — headlines, big figures.
+- **Display:** Geist via `--font-display` (`.font-display`, tight tracking) — headlines, big figures.
 - **Body:** Geist.
 - **Mono:** Geist Mono (`.font-mono-num`, tabular) — all currency amounts.
 - Gradient headline accent: `.text-gradient` (white → lilac → mint).

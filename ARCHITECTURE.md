@@ -1,9 +1,11 @@
 # Architecture
 
-Ledger is a **client-first** Next.js 16 app. The planner runs entirely in the
-browser today (localStorage), fronted by a typed API layer (ts-rest) that
-currently backs authentication and is designed to grow into the server side as
-Supabase/Stripe are added.
+Ledger is a Next.js 16 app. Debts, payments, accounts, billing and notifications
+go through one typed API layer (ts-rest). Each integration is env-gated: with
+Supabase configured, auth and data use Supabase (RLS scopes rows to the user);
+without it, an in-memory mock provider and fixture store keep local dev working.
+Stripe, Resend, Upstash and Sentry follow the same pattern. UI preferences stay
+in localStorage.
 
 ```
 ┌───────────────────────────── Browser ─────────────────────────────┐
@@ -20,7 +22,7 @@ Supabase/Stripe are added.
                               ts-rest router (implements contract)
                                                    │
                                      AuthProvider (swap point)
-                                   mock today → Supabase later
+                                 Supabase (or mock in dev)
 ```
 
 ## Layers
@@ -64,7 +66,9 @@ no React/DOM dependencies and is the natural place for unit tests.
   type-checked on both ends. Nested under resources (`{ auth: authContract }`).
 - **`src/app/api/[...ts-rest]/route.ts`** — one catch-all `createNextHandler`
   (`handlerType: 'app-router'`) implements the contract by delegating to the auth
-  provider, exported as `GET`/`POST`.
+  provider and data layer, exported as `GET`/`POST`/`PATCH`/`DELETE`. Every
+  request body is checked by `validate.ts` before it reaches the data layer,
+  because `c.type<>()` gives no runtime validation.
 - **`client.ts`** — `initClient(contract)` gives `api.auth.login(...)` etc., fully
   typed, same-origin (session cookie rides along).
 
@@ -75,8 +79,9 @@ it via `api`. No manual fetch, no drift between client and server.
 `types.ts` defines `AuthProvider` (`signUp`/`signIn`/`signOut`/`getUser`) shaped
 after Supabase Auth. `mock-provider.ts` implements it with an in-memory user map,
 scrypt-hashed+salted passwords, and an httpOnly `ledger_session` cookie (via
-`next/headers`). `index.ts` exports the active provider — **the one line you
-change to go live with Supabase.** `useAuth.tsx` is the client context that talks
+`next/headers`). `supabase-provider.ts` is the production implementation;
+`index.ts` picks one per request (Supabase when configured) and refuses the mock
+in production unless `ALLOW_MOCK_DATA=true`. `useAuth.tsx` is the client context that talks
 to the API through the ts-rest client.
 
 ### 7. Monetization (`src/lib/tiers.ts`, `subscription.tsx`, `analytics.ts`)
@@ -103,11 +108,12 @@ sprite texture for round points, and **pauses rendering when scrolled off-screen
   `auth.signIn()` sets the session cookie → `useAuth` stores the user → navbar
   shows the avatar.
 
-## Extension roadmap
+## Integration status
 
-| Goal | Change |
+| Area | Status |
 | --- | --- |
-| Real accounts | Add `supabase-provider.ts`, switch `auth/index.ts`, set env vars |
-| Cloud-synced debts | New `debts` resource in the contract + Supabase table; migrate off localStorage |
-| Real billing | Stripe Checkout in `subscription.upgrade()` + webhook to set the plan |
-| Analytics | Replace the body of `analytics.track()` with a provider |
+| Accounts | Supabase provider in `auth/supabase-provider.ts`; mock provider for local dev |
+| Debts and payments | Supabase tables with RLS (`docs/supabase-schema.sql`); fixture store for local dev |
+| Billing | Stripe Checkout + webhook (`docs/supabase-billing.sql`); local simulation when unconfigured |
+| Reminders | Daily Vercel cron + Resend (`docs/supabase-notifications.sql`), Pro only |
+| Analytics | `analytics.track()` is still a shim with no provider |
