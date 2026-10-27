@@ -4,11 +4,18 @@
 
 import { createNextHandler, tsr } from "@ts-rest/serverless/next";
 import { contract } from "@/lib/api/contract";
+import type { DebtInput } from "@/lib/types";
 import { auth } from "@/lib/auth";
 import { data } from "@/lib/api/data";
 import { billing } from "@/lib/api/billing";
 import { account } from "@/lib/api/account";
 import { notifications } from "@/lib/api/notifications";
+import {
+  currentUser,
+  debtLimitReached,
+  validateDebtInput,
+  validatePayment,
+} from "@/lib/api/guards";
 
 const router = tsr.router(contract, {
   auth: {
@@ -78,41 +85,69 @@ const router = tsr.router(contract, {
     },
   },
 
+  // Row-level security already scopes every query to the caller, so these can't
+  // leak across accounts — but an anonymous request should say "sign in", not
+  // hand back an empty 200 that renders as "you have no debts".
   debts: {
-    list: async () => ({ status: 200, body: { debts: await data.listDebts() } }),
-    create: async ({ body }) => {
-      if (!body.name?.trim() || !(body.balance > 0)) {
-        return { status: 400, body: { error: "Name and a positive balance are required." } };
+    list: async () => {
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to see your debts." } };
       }
-      const debt = await data.createDebt(body);
+      return { status: 200, body: { debts: await data.listDebts() } };
+    },
+    create: async ({ body }) => {
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to add a debt." } };
+      }
+      const valid = validateDebtInput(body, { partial: false });
+      if (!valid.ok) return { status: 400, body: { error: valid.error } };
+
+      const limit = await debtLimitReached();
+      if (limit.reached) return { status: 403, body: { error: limit.error } };
+
+      const debt = await data.createDebt(valid.value as DebtInput);
       if (!debt) return { status: 400, body: { error: "Could not add debt." } };
       return { status: 200, body: { debt } };
     },
     update: async ({ params, body }) => {
-      const debt = await data.updateDebt(params.id, body);
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to edit this debt." } };
+      }
+      const valid = validateDebtInput(body, { partial: true });
+      if (!valid.ok) return { status: 400, body: { error: valid.error } };
+      const debt = await data.updateDebt(params.id, valid.value);
       if (!debt) return { status: 404, body: { error: "Debt not found." } };
       return { status: 200, body: { debt } };
     },
-    remove: async ({ params }) => ({
-      status: 200,
-      body: { ok: await data.removeDebt(params.id) },
-    }),
+    remove: async ({ params }) => {
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to delete this debt." } };
+      }
+      return { status: 200, body: { ok: await data.removeDebt(params.id) } };
+    },
     clear: async () => {
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to clear your data." } };
+      }
       await data.clear();
       return { status: 200, body: { ok: true } };
     },
   },
 
   payments: {
-    list: async () => ({
-      status: 200,
-      body: { payments: await data.listPayments() },
-    }),
-    log: async ({ body }) => {
-      if (!(body.amount > 0)) {
-        return { status: 400, body: { error: "Amount must be greater than 0." } };
+    list: async () => {
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to see your payments." } };
       }
-      const result = await data.logPayment(body.debtId, body.amount);
+      return { status: 200, body: { payments: await data.listPayments() } };
+    },
+    log: async ({ body }) => {
+      if (!(await currentUser())) {
+        return { status: 401, body: { error: "Sign in to log a payment." } };
+      }
+      const valid = validatePayment(body);
+      if (!valid.ok) return { status: 400, body: { error: valid.error } };
+      const result = await data.logPayment(valid.value.debtId, valid.value.amount);
       if (!result) return { status: 404, body: { error: "Debt not found." } };
       return { status: 200, body: result };
     },
@@ -152,4 +187,12 @@ const handler = createNextHandler(contract, router, {
   handlerType: "app-router",
 });
 
-export { handler as GET, handler as POST };
+// Every HTTP method the contract uses must be exported, or Next returns 405
+// before ts-rest ever sees the request. PATCH → debts.update / notifications.update,
+// DELETE → debts.remove. Keep this in sync when adding routes to the contract.
+export {
+  handler as GET,
+  handler as POST,
+  handler as PATCH,
+  handler as DELETE,
+};

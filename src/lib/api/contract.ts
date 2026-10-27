@@ -114,7 +114,10 @@ export const debtsContract = c.router({
   list: {
     method: "GET",
     path: "/api/debts",
-    responses: { 200: c.type<{ debts: Debt[] }>() },
+    responses: {
+      200: c.type<{ debts: Debt[] }>(),
+      401: c.type<{ error: string }>(),
+    },
     summary: "List all debts",
   },
   create: {
@@ -124,6 +127,9 @@ export const debtsContract = c.router({
     responses: {
       200: c.type<{ debt: Debt }>(),
       400: c.type<{ error: string }>(),
+      401: c.type<{ error: string }>(),
+      // Free-plan debt cap reached — enforced server-side, not just in the UI.
+      403: c.type<{ error: string }>(),
     },
     summary: "Add a debt",
   },
@@ -133,6 +139,8 @@ export const debtsContract = c.router({
     body: c.type<Partial<DebtInput>>(),
     responses: {
       200: c.type<{ debt: Debt }>(),
+      400: c.type<{ error: string }>(),
+      401: c.type<{ error: string }>(),
       404: c.type<{ error: string }>(),
     },
     summary: "Edit a debt",
@@ -140,14 +148,20 @@ export const debtsContract = c.router({
   remove: {
     method: "DELETE",
     path: "/api/debts/:id",
-    responses: { 200: c.type<{ ok: boolean }>() },
+    responses: {
+      200: c.type<{ ok: boolean }>(),
+      401: c.type<{ error: string }>(),
+    },
     summary: "Delete a debt",
   },
   clear: {
     method: "POST",
     path: "/api/debts/clear",
     body: c.noBody(),
-    responses: { 200: c.type<{ ok: boolean }>() },
+    responses: {
+      200: c.type<{ ok: boolean }>(),
+      401: c.type<{ error: string }>(),
+    },
     summary: "Delete all debts and payments",
   },
 });
@@ -156,7 +170,10 @@ export const paymentsContract = c.router({
   list: {
     method: "GET",
     path: "/api/payments",
-    responses: { 200: c.type<{ payments: Payment[] }>() },
+    responses: {
+      200: c.type<{ payments: Payment[] }>(),
+      401: c.type<{ error: string }>(),
+    },
     summary: "List logged payments",
   },
   log: {
@@ -166,6 +183,7 @@ export const paymentsContract = c.router({
     responses: {
       200: c.type<{ payment: Payment; debt: Debt; cleared: boolean }>(),
       400: c.type<{ error: string }>(),
+      401: c.type<{ error: string }>(),
       404: c.type<{ error: string }>(),
     },
     summary: "Log a payment against a debt",
