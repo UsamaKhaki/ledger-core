@@ -12,32 +12,12 @@ import { isStripeConfigured } from "@/lib/stripe/server";
 import { isEmailConfigured, sendEmail } from "@/lib/email";
 import { reminderEmail, summaryEmail } from "@/lib/email/templates";
 import { dueInfo } from "@/lib/cards";
-import { LIMITS } from "@/lib/tiers";
+import { remindersAllowed } from "@/lib/tiers";
 
 function authorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
   return req.headers.get("authorization") === `Bearer ${secret}`;
-}
-
-/**
- * Emailed reminders are a Pro feature, so enforce it where the send actually
- * happens — a UI-only gate would be decorative.
- *
- * Only enforced when Stripe is configured. Without it the app runs in
- * local-simulation billing mode (see `subscription.tsx`), where nobody's
- * profile is ever marked "pro" and this would silently email no one.
- */
-function planAllowsReminders(profile: {
-  plan?: string | null;
-  subscription_status?: string | null;
-}): boolean {
-  if (!isStripeConfigured()) return true;
-  const active =
-    profile.subscription_status === "active" ||
-    profile.subscription_status === "trialing";
-  const isPro = profile.plan === "pro" && active;
-  return LIMITS[isPro ? "pro" : "free"].reminders;
 }
 
 function sameDay(a: number, b: number): boolean {
@@ -50,7 +30,21 @@ function sameDay(a: number, b: number): boolean {
   );
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Columns from docs/supabase-schema.sql plus the billing and notifications
+// migrations next to it.
+type ProfileRow = {
+  id: string;
+  display_name: string | null;
+  email_reminders: boolean;
+  reminder_lead_days: number;
+  weekly_summary: boolean;
+  currency: string;
+  last_reminder_at: string | null;
+  last_summary_at: string | null;
+  plan: string;
+  subscription_status: string | null;
+};
+
 type DebtRow = {
   name: string;
   balance: number;
@@ -76,7 +70,7 @@ async function run(req: Request): Promise<Response> {
   // past the first page silently stops receiving reminders, and nothing in the
   // response would show it.
   const PROFILE_PAGE = 500;
-  const profiles: Record<string, unknown>[] = [];
+  const profiles: ProfileRow[] = [];
   for (let from = 0; ; from += PROFILE_PAGE) {
     const { data: page, error } = await admin
       .from("profiles")
@@ -117,7 +111,7 @@ async function run(req: Request): Promise<Response> {
   let summaryCandidates = 0;
   let skippedNotPro = 0;
 
-  for (const p of profiles as any[]) {
+  for (const p of profiles) {
     const email = emailById.get(p.id);
     if (!email) continue;
 
@@ -132,7 +126,7 @@ async function run(req: Request): Promise<Response> {
     const name = p.display_name ?? "";
     const currency = p.currency ?? "USD";
 
-    if (!planAllowsReminders(p)) {
+    if (!remindersAllowed(p, isStripeConfigured())) {
       skippedNotPro++;
       continue;
     }
@@ -232,7 +226,6 @@ async function run(req: Request): Promise<Response> {
     summariesSent,
   });
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export async function GET(req: Request) {
   return run(req);
