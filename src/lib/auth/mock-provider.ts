@@ -109,14 +109,15 @@ export const mockAuthProvider: AuthProvider = {
 
   async signIn({ email, password }: Credentials): Promise<AuthResult> {
     email = email.trim().toLowerCase();
+    // One message for both failures, so the form can't be used to probe
+    // which emails have accounts (Supabase behaves the same way).
+    const failed = { user: null, error: "Incorrect email or password." };
     const rec = usersByEmail.get(email);
-    if (!rec) {
-      return { user: null, error: "No account found with this email." };
-    }
+    if (!rec) return failed;
     const attempt = Buffer.from(hashPassword(password, rec.salt), "hex");
     const stored = Buffer.from(rec.hash, "hex");
     if (attempt.length !== stored.length || !timingSafeEqual(attempt, stored)) {
-      return { user: null, error: "Incorrect password." };
+      return failed;
     }
     await startSession(email);
     return { user: stripSecrets(rec), error: null };
