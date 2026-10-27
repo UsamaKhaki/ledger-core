@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "./Modal";
 import type { Debt } from "@/lib/types";
 import { useMoney } from "@/lib/CurrencyContext";
+import { toNumber } from "@/lib/importCsv";
 
 export function LogPaymentModal({
   debt,
@@ -23,7 +24,7 @@ export function LogPaymentModal({
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const value = parseFloat(amount);
+    const value = toNumber(amount) ?? NaN;
     if (!(value > 0)) return setError("Enter an amount greater than 0.");
     onConfirm(debt.id, value);
   }

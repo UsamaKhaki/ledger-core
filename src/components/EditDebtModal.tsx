@@ -5,6 +5,7 @@ import { Modal } from "./Modal";
 import type { Debt, DebtKind } from "@/lib/types";
 import { DEBT_KINDS, isCardKind } from "@/lib/cards";
 import { useMoney } from "@/lib/CurrencyContext";
+import { toNumber } from "@/lib/importCsv";
 
 const field =
   "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[15px] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20";
@@ -34,11 +35,11 @@ export function EditDebtModal({
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const b = parseFloat(balance);
-    const a = parseFloat(apr);
-    const m = parseFloat(minPayment);
-    const limit = creditLimit ? parseFloat(creditLimit) : null;
-    const due = dueDay ? parseInt(dueDay, 10) : null;
+    const b = toNumber(balance) ?? NaN;
+    const a = toNumber(apr) ?? NaN;
+    const m = toNumber(minPayment) ?? NaN;
+    const limit = creditLimit ? (toNumber(creditLimit) ?? NaN) : null;
+    const due = dueDay ? (toNumber(dueDay) ?? NaN) : null;
 
     if (!name.trim()) return setError("Give it a name.");
     if (!(b >= 0)) return setError("Balance can't be negative.");
@@ -46,7 +47,7 @@ export function EditDebtModal({
     if (!(m >= 0)) return setError("Enter a valid minimum payment.");
     if (limit !== null && !(limit > 0))
       return setError("Credit limit must be greater than 0.");
-    if (due !== null && (due < 1 || due > 31))
+    if (due !== null && !(Number.isInteger(due) && due >= 1 && due <= 31))
       return setError("Due day must be between 1 and 31.");
 
     onSave({

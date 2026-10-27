@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { DebtInput, DebtKind } from "@/lib/types";
 import { DEBT_KINDS, isCardKind } from "@/lib/cards";
+import { toNumber } from "@/lib/importCsv";
 
 type Draft = {
   name: string;
@@ -59,11 +60,11 @@ export function DebtForm({
     e.preventDefault();
     if (atLimit) return onLimit?.();
 
-    const balance = parseFloat(draft.balance);
-    const apr = parseFloat(draft.apr);
-    const minPayment = parseFloat(draft.minPayment);
-    const creditLimit = draft.creditLimit ? parseFloat(draft.creditLimit) : null;
-    const dueDay = draft.dueDay ? parseInt(draft.dueDay, 10) : null;
+    const balance = toNumber(draft.balance) ?? NaN;
+    const apr = toNumber(draft.apr) ?? NaN;
+    const minPayment = toNumber(draft.minPayment) ?? NaN;
+    const creditLimit = draft.creditLimit ? (toNumber(draft.creditLimit) ?? NaN) : null;
+    const dueDay = draft.dueDay ? (toNumber(draft.dueDay) ?? NaN) : null;
 
     const fail = (key: keyof Draft, msg: string) => {
       setErrorField(key);
@@ -77,7 +78,7 @@ export function DebtForm({
       return fail("minPayment", "Enter a valid minimum payment.");
     if (creditLimit !== null && !(creditLimit > 0))
       return fail("creditLimit", "Credit limit must be greater than 0.");
-    if (dueDay !== null && (dueDay < 1 || dueDay > 31))
+    if (dueDay !== null && !(Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31))
       return fail("dueDay", "Due day must be between 1 and 31.");
 
     onAdd({

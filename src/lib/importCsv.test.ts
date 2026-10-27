@@ -19,6 +19,11 @@ describe("toNumber", () => {
     expect(toNumber("")).toBeNull();
     expect(toNumber("abc")).toBeNull();
   });
+  it("rejects malformed numbers instead of reading a prefix", () => {
+    // parseFloat("40-5") is 40; the forms rely on this returning null.
+    expect(toNumber("40-5")).toBeNull();
+    expect(toNumber("1.2.3")).toBeNull();
+  });
 });
 
 describe("toKind", () => {
