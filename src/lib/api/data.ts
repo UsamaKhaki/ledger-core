@@ -6,8 +6,32 @@ import type { Debt, DebtInput, Payment } from "@/lib/types";
 import { supabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import { store } from "./store";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-function toDebt(r: any): Debt {
+// Row shapes from docs/supabase-schema.sql. PostgREST can serialise `numeric`
+// as a string, so money columns go through Number() on the way out.
+type Numeric = number | string;
+
+type DebtRow = {
+  id: string;
+  name: string;
+  kind: Debt["kind"];
+  issuer: string | null;
+  balance: Numeric;
+  starting_balance: Numeric;
+  apr: Numeric;
+  min_payment: Numeric;
+  credit_limit: Numeric | null;
+  due_day: number | null;
+};
+
+type PaymentRow = {
+  id: string;
+  debt_id: string;
+  amount: Numeric;
+  paid_at: string;
+  cleared_debt: boolean;
+};
+
+function toDebt(r: DebtRow): Debt {
   return {
     id: r.id,
     name: r.name,
@@ -21,7 +45,7 @@ function toDebt(r: any): Debt {
     dueDay: r.due_day ?? null,
   };
 }
-function toPayment(r: any): Payment {
+function toPayment(r: PaymentRow): Payment {
   return {
     id: r.id,
     debtId: r.debt_id,
@@ -30,7 +54,6 @@ function toPayment(r: any): Payment {
     clearedDebt: r.cleared_debt,
   };
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 const supa = isSupabaseConfigured();
 
