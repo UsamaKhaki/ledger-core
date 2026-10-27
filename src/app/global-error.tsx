@@ -8,10 +8,12 @@ import { useEffect } from "react";
 // its own <html>/<body> because it replaces the root layout.
 export default function GlobalError({
   error,
-  reset,
+  unstable_retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  // Next 16.2: `reset()` only clears the error state, `unstable_retry()`
+  // re-fetches and re-renders — which is what "Try again" should do.
+  unstable_retry: () => void;
 }) {
   useEffect(() => {
     Sentry.captureException(error);
@@ -49,7 +51,7 @@ export default function GlobalError({
             you can try again.
           </p>
           <button
-            onClick={reset}
+            onClick={() => unstable_retry()}
             style={{
               border: "1px solid #35353c",
               background: "#e7e7ea",
