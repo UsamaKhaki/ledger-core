@@ -11,6 +11,7 @@ import {
   priceFor,
   siteBase,
 } from "@/lib/stripe/server";
+import { isProProfile } from "@/lib/tiers";
 
 export type BillingStatus = {
   configured: boolean;
@@ -40,10 +41,7 @@ export const billing = {
       .eq("id", user.id)
       .single();
 
-    const active =
-      p?.subscription_status === "active" ||
-      p?.subscription_status === "trialing";
-    const isPro = p?.plan === "pro" && active;
+    const isPro = isProProfile(p);
     return {
       configured: true,
       plan: isPro ? "pro" : "free",

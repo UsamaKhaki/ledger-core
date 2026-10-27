@@ -7,6 +7,7 @@
 import type Stripe from "stripe";
 import { stripe, billingForPrice } from "@/lib/stripe/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { isEntitledStatus } from "@/lib/tiers";
 
 // current_period_end moved onto subscription items in recent API versions;
 // read it from the item first, then fall back to the (older) top-level field.
@@ -22,7 +23,7 @@ function periodEndISO(sub: Stripe.Subscription): string | null {
 
 async function syncSubscription(customerId: string, sub: Stripe.Subscription) {
   const priceId = sub.items?.data?.[0]?.price?.id ?? null;
-  const active = sub.status === "active" || sub.status === "trialing";
+  const active = isEntitledStatus(sub.status);
   await supabaseAdmin()
     .from("profiles")
     .update({

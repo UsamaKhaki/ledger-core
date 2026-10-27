@@ -71,3 +71,34 @@ export const FEATURE_MATRIX: Feature[] = [
   { label: "Cloud sync across devices", free: true, pro: true },
   { label: "Priority support", free: false, pro: true },
 ];
+
+// Stripe subscription statuses that keep Pro on. Anything else (past_due,
+// canceled, unpaid, incomplete, ...) falls back to free.
+export function isEntitledStatus(status: string | null | undefined): boolean {
+  return status === "active" || status === "trialing";
+}
+
+type ProfileBilling = {
+  plan?: string | null;
+  subscription_status?: string | null;
+};
+
+/** Server-truth plan check against a profile row mirrored by the Stripe webhook. */
+export function isProProfile(profile: ProfileBilling | null | undefined): boolean {
+  return profile?.plan === "pro" && isEntitledStatus(profile.subscription_status);
+}
+
+/**
+ * Emailed reminders are a Pro feature, enforced where the send happens.
+ *
+ * Without Stripe the app runs in local-simulation billing mode (see
+ * `subscription.tsx`), where no profile is ever marked "pro", so the gate is
+ * off rather than silently emailing no one.
+ */
+export function remindersAllowed(
+  profile: ProfileBilling,
+  stripeConfigured: boolean,
+): boolean {
+  if (!stripeConfigured) return true;
+  return LIMITS[isProProfile(profile) ? "pro" : "free"].reminders;
+}
