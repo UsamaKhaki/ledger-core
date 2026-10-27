@@ -52,11 +52,34 @@ async function enforceRateLimit(
   );
 }
 
+/** Routes that require a session. `/settings` exposes the account (email,
+ *  password, plan, data export, deletion) so it is gated exactly like `/app`. */
 function isAppRoute(pathname: string): boolean {
-  return pathname === "/app" || pathname.startsWith("/app/");
+  return (
+    pathname === "/app" ||
+    pathname.startsWith("/app/") ||
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/")
+  );
 }
 function isAuthPage(pathname: string): boolean {
   return AUTH_PAGES.includes(pathname);
+}
+
+/**
+ * Loop-breaker for the auth-page redirect.
+ *
+ * The proxy's "you look signed in, go to /app" check is optimistic; the `/app`
+ * server layout is authoritative. When they disagree — a stale session cookie,
+ * a session the proxy can see but the layout can't — each bounces to the other
+ * forever and the user is locked out of the sign-in page with a blank screen.
+ *
+ * The authoritative check always redirects with `?next=`, so its presence means
+ * we were just sent here by the layer that actually knows. Trust it and let the
+ * auth page render, so the user can sign in again instead of ping-ponging.
+ */
+function sentHereByTheAppGate(request: NextRequest): boolean {
+  return request.nextUrl.searchParams.has("next");
 }
 
 function redirectTo(request: NextRequest, pathname: string, withNext = false) {
@@ -83,9 +106,14 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   // Mock/dev mode (no Supabase): optimistic cookie-presence checks only.
   if (!supaUrl || !supaKey) {
+    // Cookie presence only — the mock provider's session table lives in the
+    // server process, which the proxy can't read. `/app`'s layout does the real
+    // check, so this is a fast path, not a security boundary.
     const signedIn = !!request.cookies.get("ledger_session");
     if (isAppRoute(pathname) && !signedIn) return redirectTo(request, "/login", true);
-    if (isAuthPage(pathname) && signedIn) return redirectTo(request, "/app");
+    if (isAuthPage(pathname) && signedIn && !sentHereByTheAppGate(request)) {
+      return redirectTo(request, "/app");
+    }
     return NextResponse.next();
   }
 
@@ -113,7 +141,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   } = await supabase.auth.getUser();
 
   if (!user && isAppRoute(pathname)) return redirectTo(request, "/login", true);
-  if (user && isAuthPage(pathname)) return redirectTo(request, "/app");
+  if (user && isAuthPage(pathname) && !sentHereByTheAppGate(request)) {
+    return redirectTo(request, "/app");
+  }
 
   return response;
 }
