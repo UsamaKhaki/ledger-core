@@ -33,6 +33,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# env files hold real keys and must never be committed
+.env
+.env.*
+!.env.example
+
+# local editor / agent config
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
