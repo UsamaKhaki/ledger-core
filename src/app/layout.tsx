@@ -25,7 +25,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Ledger — Get out of debt, simply and smartly",
+    default: "Ledger: Get out of debt, simply and smartly",
     template: "%s · Ledger",
   },
   description: DESCRIPTION,
@@ -46,12 +46,12 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Ledger",
     url: SITE_URL,
-    title: "Ledger — Get out of debt, simply and smartly",
+    title: "Ledger: Get out of debt, simply and smartly",
     description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ledger — Get out of debt, simply and smartly",
+    title: "Ledger: Get out of debt, simply and smartly",
     description: DESCRIPTION,
   },
   robots: {

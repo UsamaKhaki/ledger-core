@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ledger — Debt Planner",
+    name: "Ledger Debt Planner",
     short_name: "Ledger",
     description:
       "Turn your debts into one clear plan. See your debt-free date and track every payment.",
