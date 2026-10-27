@@ -132,7 +132,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+    /* Standard page container (CLAUDE.md: one container for every route);
+       the settings rows are narrowed inside it, not by shrinking the page. */
+    <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 sm:py-10 lg:w-4/5">
+      <div className="mx-auto w-full max-w-4xl">
       <header className="reveal">
         <p className="kicker">Preferences</p>
         <h1 className="font-display mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
@@ -317,14 +320,36 @@ export default function SettingsPage() {
           </div>
         </Row>
 
-        {/* Email notifications (server-backed) */}
+        {/* Email notifications (server-backed) — a Pro feature, enforced in the
+            reminders cron. Show the upgrade path instead of controls that
+            wouldn't send anything. */}
         {user ? (
           <Row
             label="Email notifications"
             description="Reminders and progress updates sent to your inbox."
+            aside={
+              !isPro && configured ? (
+                <span className="chip !text-[var(--brand)]">Pro</span>
+              ) : null
+            }
           >
             <div className={panel}>
-              <EmailNotifications />
+              {isPro || !configured ? (
+                <EmailNotifications />
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-sm leading-relaxed text-[var(--muted)]">
+                    Get a nudge before each due date and a weekly progress
+                    recap, emailed to you.
+                  </p>
+                  <Link
+                    href="/pricing"
+                    className="btn-white shrink-0 rounded-xl px-4 py-2 text-sm"
+                  >
+                    Upgrade
+                  </Link>
+                </div>
+              )}
             </div>
           </Row>
         ) : null}
@@ -502,6 +527,7 @@ export default function SettingsPage() {
       >
         ← Back to planner
       </Link>
+      </div>
     </main>
   );
 }

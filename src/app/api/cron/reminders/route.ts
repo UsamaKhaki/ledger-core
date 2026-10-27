@@ -8,14 +8,36 @@
 
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { isStripeConfigured } from "@/lib/stripe/server";
 import { isEmailConfigured, sendEmail } from "@/lib/email";
 import { reminderEmail, summaryEmail } from "@/lib/email/templates";
 import { dueInfo } from "@/lib/cards";
+import { LIMITS } from "@/lib/tiers";
 
 function authorized(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
   return req.headers.get("authorization") === `Bearer ${secret}`;
+}
+
+/**
+ * Emailed reminders are a Pro feature, so enforce it where the send actually
+ * happens — a UI-only gate would be decorative.
+ *
+ * Only enforced when Stripe is configured. Without it the app runs in
+ * local-simulation billing mode (see `subscription.tsx`), where nobody's
+ * profile is ever marked "pro" and this would silently email no one.
+ */
+function planAllowsReminders(profile: {
+  plan?: string | null;
+  subscription_status?: string | null;
+}): boolean {
+  if (!isStripeConfigured()) return true;
+  const active =
+    profile.subscription_status === "active" ||
+    profile.subscription_status === "trialing";
+  const isPro = profile.plan === "pro" && active;
+  return LIMITS[isPro ? "pro" : "free"].reminders;
 }
 
 function sameDay(a: number, b: number): boolean {
@@ -49,24 +71,53 @@ async function run(req: Request): Promise<Response> {
   const appUrl = `${base}/app`;
   const WEEK = 7 * 24 * 60 * 60 * 1000;
 
-  const { data: profiles } = await admin
-    .from("profiles")
-    .select(
-      "id,display_name,email_reminders,reminder_lead_days,weekly_summary,currency,last_reminder_at,last_summary_at",
-    );
+  // Both of these MUST paginate. PostgREST caps a select at 1000 rows and
+  // `listUsers()` returns one page (50) by default — without this, every user
+  // past the first page silently stops receiving reminders, and nothing in the
+  // response would show it.
+  const PROFILE_PAGE = 500;
+  const profiles: Record<string, unknown>[] = [];
+  for (let from = 0; ; from += PROFILE_PAGE) {
+    const { data: page, error } = await admin
+      .from("profiles")
+      .select(
+        "id,display_name,email_reminders,reminder_lead_days,weekly_summary,currency,last_reminder_at,last_summary_at,plan,subscription_status",
+      )
+      .order("id", { ascending: true })
+      .range(from, from + PROFILE_PAGE - 1);
+    if (error) {
+      console.error("[cron/reminders] profile page failed:", error.message);
+      return Response.json({ error: "could not load profiles" }, { status: 500 });
+    }
+    if (!page || page.length === 0) break;
+    profiles.push(...page);
+    if (page.length < PROFILE_PAGE) break;
+  }
 
-  // Map user id → email (first page; paginate later at scale).
-  const { data: userList } = await admin.auth.admin.listUsers();
-  const emailById = new Map<string, string | undefined>(
-    (userList?.users ?? []).map((u) => [u.id, u.email ?? undefined]),
-  );
+  // Map user id → email, walking every page of the auth user list.
+  const emailById = new Map<string, string | undefined>();
+  const USER_PAGE = 1000;
+  for (let page = 1; ; page++) {
+    const { data: userList, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: USER_PAGE,
+    });
+    if (error) {
+      console.error("[cron/reminders] listUsers page failed:", error.message);
+      return Response.json({ error: "could not load users" }, { status: 500 });
+    }
+    const users = userList?.users ?? [];
+    for (const u of users) emailById.set(u.id, u.email ?? undefined);
+    if (users.length < USER_PAGE) break;
+  }
 
   let remindersSent = 0;
   let summariesSent = 0;
   let reminderCandidates = 0;
   let summaryCandidates = 0;
+  let skippedNotPro = 0;
 
-  for (const p of (profiles ?? []) as any[]) {
+  for (const p of profiles as any[]) {
     const email = emailById.get(p.id);
     if (!email) continue;
 
@@ -80,6 +131,11 @@ async function run(req: Request): Promise<Response> {
 
     const name = p.display_name ?? "";
     const currency = p.currency ?? "USD";
+
+    if (!planAllowsReminders(p)) {
+      skippedNotPro++;
+      continue;
+    }
 
     // ── Due-date reminders ──
     if (p.email_reminders) {
@@ -168,6 +224,8 @@ async function run(req: Request): Promise<Response> {
   return Response.json({
     ok: true,
     emailConfigured: isEmailConfigured(),
+    profilesScanned: profiles.length,
+    skippedNotPro,
     reminderCandidates,
     summaryCandidates,
     remindersSent,

@@ -17,8 +17,12 @@ export const LIMITS: Record<Plan, Limits> = {
     csvExport: false,
     strategyComparison: true,
     whatIf: true,
+    // Emailed due-date reminders + the weekly summary are a Pro feature,
+    // enforced in the reminders cron (not just hidden in the UI).
     reminders: false,
-    cloudSync: false,
+    // Anyone with an account gets their data stored and synced server-side —
+    // that is inherent to signing in, so it cannot honestly be sold as Pro.
+    cloudSync: true,
   },
   pro: {
     maxDebts: Infinity,
@@ -62,7 +66,8 @@ export const FEATURE_MATRIX: Feature[] = [
   { label: "Milestone celebrations", free: true, pro: true },
   { label: "Full amortization schedule", free: false, pro: true },
   { label: "Export plan to CSV", free: false, pro: true },
-  { label: "Payment reminders", free: false, pro: "Coming soon" },
-  { label: "Cloud sync across devices", free: false, pro: "Coming soon" },
+  { label: "Email payment reminders", free: false, pro: true },
+  { label: "Weekly progress email", free: false, pro: true },
+  { label: "Cloud sync across devices", free: true, pro: true },
   { label: "Priority support", free: false, pro: true },
 ];

@@ -132,7 +132,7 @@ export default function PricingPage() {
               : "billed monthly"}
           </p>
           <ul className="mt-5 flex-1 space-y-2 text-sm">
-            {["Everything in Free", "Unlimited debts", "Full amortization schedule", "Export plan to CSV", "Payment reminders (soon)", "Cloud sync (soon)", "Priority support"].map(
+            {["Everything in Free", "Unlimited debts", "Full amortization schedule", "Export plan to CSV", "Email payment reminders", "Weekly progress email", "Priority support"].map(
               (f) => (
                 <li key={f} className="flex items-start gap-2">
                   <span className="mt-0.5 text-[var(--success)]">✓</span>
