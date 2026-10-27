@@ -1,8 +1,14 @@
-# Ledger — Growth, Monetization & Production Roadmap
+# Ledger: Growth, Monetization & Production Roadmap
 
-A senior-analyst plan to take Ledger from a polished prototype to a
-revenue-generating product across **US, Canada, Europe, and the UAE**, with
-first-class **multi-card / multi-account** tracking.
+> **Note:** this is the original planning document, written while Ledger was
+> still a prototype. Much of section 6 and the P0/P1 phases have since shipped
+> (Supabase auth and data with RLS, Stripe billing, email reminders, per-card
+> pages, Vitest and CI). For the current state, see the
+> [README](../README.md#status-and-limitations).
+
+The plan to take Ledger from a polished prototype to a revenue-generating
+product across **US, Canada, Europe, and the UAE**, with first-class
+**multi-card / multi-account** tracking.
 
 ---
 
@@ -26,13 +32,13 @@ one place the API grows.
 
 **Category:** personal debt-payoff planning (adjacent to budgeting).
 **Comparables:** Undebt.it, Debt Payoff Planner, YNAB (budgeting), Rocket Money
-(subscriptions/negotiation). Tally (debt manager) shut down — a gap to fill.
+(subscriptions/negotiation). Tally (debt manager) shut down, which leaves a gap to fill.
 
 **Differentiation to lean into:**
-1. **Privacy-first, no bank linking required** — huge trust advantage vs.
+1. **Privacy-first, no bank linking required**: a large trust advantage vs.
    aggregators, and it sidesteps open-banking cost/complexity early.
 2. **Clarity of the "debt-free date"** as the hero metric.
-3. **Multi-card / multi-account** clarity (see §4) — the daily-use hook.
+3. **Multi-card / multi-account** clarity (see §4): the daily-use hook.
 4. **Truly multi-region** from day one (currency, language, RTL, compliance).
 
 **Positioning line:** "See every card, one clear payoff plan, the exact day
@@ -48,11 +54,11 @@ Model: **freemium subscription** (already scaffolded). Refined plan:
 | --- | --- | --- |
 | Debts/cards | up to 3 | unlimited |
 | Strategies, chart, debt-free date | ✓ | ✓ |
-| Amortization schedule, CSV/PDF export | — | ✓ |
-| Payment reminders & due-date calendar | — | ✓ |
-| Cloud sync across devices | — | ✓ |
+| Amortization schedule, CSV/PDF export | ✗ | ✓ |
+| Payment reminders & due-date calendar | ✗ | ✓ |
+| Cloud sync across devices | ✗ | ✓ |
 | Scenarios (what-if, refinance, consolidation) | 1 | unlimited |
-| Insights & monthly report | — | ✓ |
+| Insights & monthly report | ✗ | ✓ |
 
 **Pricing (regional, via Stripe + Purchasing Power / local price lists):**
 - US $6/mo · $48/yr · CA C$8/mo · EU €6/mo (VAT incl.) · UAE AED 22/mo.
@@ -61,7 +67,7 @@ Model: **freemium subscription** (already scaffolded). Refined plan:
 - Add **Stripe Tax** for VAT (EU/UAE) and US sales tax automatically.
 
 **Secondary revenue (later, opt-in, disclosed):** affiliate referrals for
-balance-transfer cards / refinance / debt consolidation — high intent, high
+balance-transfer cards / refinance / debt consolidation: high intent, high
 payout, but keep it non-creepy and clearly labeled to protect trust.
 
 **Unit-economics levers:** activation (add ≥1 debt + see date), free→paid at the
@@ -72,7 +78,7 @@ gamification (the retention engine).
 
 ## 4. The multi-card / multi-account model (core product bet)
 
-People don't think "debts" — they think "my Visa, my car, my Amex, my student
+People don't think "debts"; they think "my Visa, my car, my Amex, my student
 loan." Model that explicitly.
 
 **Data model (Supabase / Postgres):**
@@ -96,14 +102,14 @@ mortgage | medical | bnpl | other. Cards add **credit_limit** →
 - **Per-card detail pages** with balance history, utilization gauge, statement/
   due dates, and this card's contribution to the plan.
 - **Due-date calendar** + reminders (the #1 retention feature).
-- **Multi-currency portfolios** (a UAE user with an AED card + a USD card) —
+- **Multi-currency portfolios** (a UAE user with an AED card + a USD card):
   convert to a base currency for the combined plan; store per-debt currency.
 - **Accounts/grouping** for households or "mine vs. joint."
 - **Utilization & credit-health nudges** ("pay $120 to drop Visa under 30%").
 - **Scenarios**: extra payment, one-off windfall, balance transfer, consolidation.
 
 **Engineering path:** extend `contract.ts` with `accounts`, `scenarios`,
-`reminders`; the payoff engine already handles N debts — add currency conversion
+`reminders`; the payoff engine already handles N debts; add currency conversion
 and utilization. RLS scopes every table by `user_id`.
 
 ---
@@ -116,14 +122,14 @@ and utilization. RLS scopes every table by `user_id`.
 | **Language / i18n** | `next-intl`. Ship **en** first; add **fr** (CA/EU), **de**, **ar** (UAE). Externalize strings now to avoid a painful retrofit. |
 | **RTL (Arabic)** | `dir="rtl"` per locale; audit layouts (already avoid symbol-on-axis issues). Logical CSS props (`ms-`/`me-`). |
 | **Formats** | Locale-aware number/date via `Intl` (already used for currency). |
-| **Tax** | **Stripe Tax** — EU VAT, UAE 5% VAT, US sales tax, CA GST/HST. Show tax-inclusive pricing in EU/UAE. |
+| **Tax** | **Stripe Tax**: EU VAT, UAE 5% VAT, US sales tax, CA GST/HST. Show tax-inclusive pricing in EU/UAE. |
 | **Payments** | Stripe: cards + Apple/Google Pay everywhere; **SEPA/iDEAL/Bancontact** (EU); local cards (UAE). |
 | **Data residency** | Offer EU data region (Supabase EU project) for EU users; document processing locations. |
 | **Compliance** | **GDPR** (EU), **UK-GDPR**, **PIPEDA** (CA), **CCPA/CPRA** (California), **UAE PDPL**. Consent banner, DPA, privacy policy, data export + delete (right to erasure), cookie/analytics consent. |
 | **Trust/marketing** | "Not financial advice" disclaimer (present), clear no-bank-linking messaging, regional testimonials later. |
 
 **Why privacy-first helps here:** no bank aggregation means far lighter
-regulatory load (no PSD2/open-banking licensing) while still being useful — a
+regulatory load (no PSD2/open-banking licensing) while still being useful, a
 real strategic moat for a small team entering 4 regions.
 
 ---
@@ -132,11 +138,11 @@ real strategic moat for a small team entering 4 regions.
 
 Ordered by dependency.
 
-1. **Auth + DB — Supabase.** Implement `supabase-provider.ts` (swap
+1. **Auth + DB: Supabase.** Implement `supabase-provider.ts` (swap
    `auth/index.ts`), move `store.ts` to Supabase queries with **Row-Level
    Security**. Gate `/app` behind auth; migrate localStorage → account on first
    login.
-2. **Billing — Stripe.** Products/prices per region, Checkout, Customer Portal,
+2. **Billing: Stripe.** Products/prices per region, Checkout, Customer Portal,
    **webhooks** to set the plan server-side (never trust the client),
    entitlements read from DB. Wire `subscription.upgrade()` + pricing
    `startCheckout()`.
@@ -146,7 +152,7 @@ Ordered by dependency.
    rate limiting, secure cookies (done), CSRF posture for mutations, secrets in
    Vercel env, dependency audit (currently 3 highs to clear + ts-rest RC pin).
 5. **Observability.** Sentry (errors), Vercel Analytics/Speed Insights, product
-   analytics (PostHog) — wire `analytics.track()` funnel that already exists.
+   analytics (PostHog); wire `analytics.track()` funnel that already exists.
 6. **Quality.** Unit tests for `debt.ts` (pure, high-value) with Vitest;
    Playwright smoke for signup→add debt→pay→see plan; **CI** (typecheck + lint +
    build + tests) on every PR; preview deploys.
@@ -163,7 +169,7 @@ Ordered by dependency.
 
 - **Acquisition:** SEO calculators + content ("how to pay off credit card debt");
   app-store presence later (PWA/React Native wrapper); regional keyword variants.
-- **Activation:** get to "debt-free date" fast — the aha moment. Instrument it.
+- **Activation:** get to "debt-free date" fast; that is the aha moment. Instrument it.
 - **Retention:** reminders, due-date calendar, progress/milestones, monthly
   report email. This is where subscription revenue is actually earned.
 - **Referral:** "share your win" milestone cards; give-a-month referral.
@@ -176,15 +182,15 @@ activated→paid, trial→paid, monthly churn, ARPU by region, LTV:CAC.
 
 ## 8. Phased plan
 
-- **P0 — Make it real (4–6 wks):** Supabase auth + DB + RLS, per-user data,
+- **P0, make it real (4–6 wks):** Supabase auth + DB + RLS, per-user data,
   Stripe billing + webhooks, gate `/app`, migrate localStorage, Sentry + PostHog,
   CI + tests, privacy policy + consent. → *can charge money.*
-- **P1 — Multi-card depth (3–4 wks):** accounts, card fields (limit/utilization,
+- **P1, multi-card depth (3–4 wks):** accounts, card fields (limit/utilization,
   statement/due), per-card pages, due-date calendar, reminders (email). → *daily
   use + retention.*
-- **P2 — Regionalize (3–4 wks):** i18n (fr/de/ar) + RTL, Stripe Tax, regional
+- **P2, regionalize (3–4 wks):** i18n (fr/de/ar) + RTL, Stripe Tax, regional
   pricing, SEPA/iDEAL, EU data region, per-debt currency + FX. → *unlock 4 markets.*
-- **P3 — Growth (ongoing):** SEO calculators, scenarios (refinance/consolidation),
+- **P3, growth (ongoing):** SEO calculators, scenarios (refinance/consolidation),
   insights & monthly report, referrals, affiliate (opt-in), mobile/PWA.
 
 ---
@@ -199,5 +205,5 @@ activated→paid, trial→paid, monthly churn, ARPU by region, LTV:CAC.
 5. Ship the **multi-card model** (limit/utilization + due dates) and per-card pages.
 6. Add **PostHog + Sentry** and a **privacy policy + consent** banner.
 
-> Guardrail: keep the privacy-first, no-bank-linking promise — it's the moat and
+> Guardrail: keep the privacy-first, no-bank-linking promise; it's the moat and
 > it keeps regulatory scope small while entering four regions.

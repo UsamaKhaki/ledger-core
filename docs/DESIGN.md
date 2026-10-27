@@ -1,4 +1,4 @@
-# Design System — "Gravity → Weightless"
+# Design System: "Gravity → Weightless"
 
 Debt has gravity; Ledger makes you weightless. The site is a single dark,
 cinematic theme. Everything is driven by CSS variables + utility classes in
@@ -13,19 +13,19 @@ cinematic theme. Everything is driven by CSS variables + utility classes in
 | `--surface-solid` `#0e0f18` | opaque panels (modals, sticky bars, chart tooltip) |
 | `--foreground` / `--muted` | text / secondary text |
 | `--border` / `--border-strong` | hairlines |
-| `--brand` `#6366f1` | indigo — interactive |
-| `--success` `#34d399` | mint — freedom/progress |
+| `--brand` `#6366f1` | indigo: interactive |
+| `--success` `#34d399` | mint: freedom/progress |
 | `--danger` `#fb7185` | rose |
-| `--accent` `#fbbf24` | amber — interest |
+| `--accent` `#fbbf24` | amber: interest |
 
-Atmosphere lives on a **fixed** `body::before` layer (indigo/mint radial glows) —
+Atmosphere lives on a **fixed** `body::before` layer (indigo/mint radial glows);
 never `background-attachment: fixed` (that repaints every scroll frame).
 
 ## Type
 
-- **Display:** Geist via `--font-display` (`.font-display`, tight tracking) — headlines, big figures.
+- **Display:** Geist via `--font-display` (`.font-display`, tight tracking): headlines, big figures.
 - **Body:** Geist.
-- **Mono:** Geist Mono (`.font-mono-num`, tabular) — all currency amounts.
+- **Mono:** Geist Mono (`.font-mono-num`, tabular): all currency amounts.
 - Gradient headline accent: `.text-gradient` (white → lilac → mint).
 
 ## Utilities
@@ -36,7 +36,7 @@ never `background-attachment: fixed` (that repaints every scroll frame).
 
 ## Motion
 
-- **Load:** `.hero-in` — staggered rise + de-blur (hero).
+- **Load:** `.hero-in`: staggered rise + de-blur (hero).
 - **Scroll:** `.rise` (CSS scroll-timeline) and `Reveal.tsx` (IntersectionObserver)
   cascade section content in with the same rise + de-blur.
 - **Ambient:** `.floaty`, `.pulse-dot`, `.marquee` (testimonials).

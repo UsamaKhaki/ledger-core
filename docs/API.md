@@ -2,7 +2,7 @@
 
 All endpoints are defined once in `src/lib/api/contract.ts` (ts-rest) and served
 by a single catch-all handler at `src/app/api/[...ts-rest]/route.ts`. Prefer the
-typed client (`src/lib/api/client.ts`) over raw `fetch` — it derives request and
+typed client (`src/lib/api/client.ts`) over raw `fetch`; it derives request and
 response types directly from the contract.
 
 ```ts
@@ -30,26 +30,26 @@ type AuthUser = {
 
 ## Endpoints
 
-### `POST /api/auth/signup` — `api.auth.signup`
+### `POST /api/auth/signup` (`api.auth.signup`)
 Create an account and start a session.
 
 - **Body:** `{ email: string; password: string; name?: string }`
 - **200:** `{ user: AuthUser }`
 - **400:** `{ error: string }` (invalid email, weak password, or email taken)
 
-### `POST /api/auth/login` — `api.auth.login`
+### `POST /api/auth/login` (`api.auth.login`)
 Verify credentials and start a session.
 
 - **Body:** `{ email: string; password: string }`
 - **200:** `{ user: AuthUser }`
 - **401:** `{ error: string }` (no such account / wrong password)
 
-### `POST /api/auth/logout` — `api.auth.logout`
+### `POST /api/auth/logout` (`api.auth.logout`)
 End the current session (clears the cookie). No body.
 
 - **200:** `{ ok: boolean }`
 
-### `GET /api/auth/me` — `api.auth.me`
+### `GET /api/auth/me` (`api.auth.me`)
 Resolve the current session user.
 
 - **200:** `{ user: AuthUser | null }`
@@ -69,42 +69,42 @@ curl -b cj.txt localhost:6101/api/auth/me
 curl -b cj.txt -c cj.txt -X POST localhost:6101/api/auth/logout
 ```
 
-## Debts — `api.debts.*`
+## Debts (`api.debts.*`)
 
 Backed by an in-memory store seeded from `src/lib/api/fixtures.ts` (dummy data
 today; Supabase later). The planner (`/app`) reads and mutates through these.
 
-### `GET /api/debts` — `api.debts.list`
+### `GET /api/debts` (`api.debts.list`)
 - **200:** `{ debts: Debt[] }`
 
-### `POST /api/debts` — `api.debts.create`
+### `POST /api/debts` (`api.debts.create`)
 - **Body:** `{ name: string; balance: number; apr: number; minPayment: number }`
 - **200:** `{ debt: Debt }` · **400:** `{ error: string }`
 
-### `PATCH /api/debts/:id` — `api.debts.update`
+### `PATCH /api/debts/:id` (`api.debts.update`)
 - **Body:** `Partial<{ name; balance; apr; minPayment }>`
 - **200:** `{ debt: Debt }` · **404:** `{ error: string }`
 
-### `DELETE /api/debts/:id` — `api.debts.remove`
+### `DELETE /api/debts/:id` (`api.debts.remove`)
 - **200:** `{ ok: boolean }`
 
-### `POST /api/debts/clear` — `api.debts.clear`
+### `POST /api/debts/clear` (`api.debts.clear`)
 - Deletes all debts + payments. **200:** `{ ok: boolean }`
 
-## Payments — `api.payments.*`
+## Payments (`api.payments.*`)
 
-### `GET /api/payments` — `api.payments.list`
+### `GET /api/payments` (`api.payments.list`)
 - **200:** `{ payments: Payment[] }`
 
-### `POST /api/payments` — `api.payments.log`
+### `POST /api/payments` (`api.payments.log`)
 - **Body:** `{ debtId: string; amount: number }`
-- **200:** `{ payment: Payment; debt: Debt; cleared: boolean }` — `cleared` is
+- **200:** `{ payment: Payment; debt: Debt; cleared: boolean }`. `cleared` is
   true when this payment brought the debt to zero.
 - **400/404:** `{ error: string }`
 
 `Debt` and `Payment` types live in `src/lib/types.ts`. The payoff **plan**
 (schedule, debt-free date, comparison) is computed client-side from the debts via
-`buildPlan` in `src/lib/debt.ts` — it isn't a separate endpoint.
+`buildPlan` in `src/lib/debt.ts`; it isn't a separate endpoint.
 
 ## Adding an endpoint
 
