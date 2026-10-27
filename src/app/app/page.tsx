@@ -216,16 +216,18 @@ export default function PlannerPage() {
 
   return (
     <main className="relative mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 sm:py-10 lg:w-4/5">
-      <div
-        className="blob fixed left-[-6%] top-24 h-72 w-72 bg-[#6366f1]"
-        style={{ opacity: 0.22 }}
-        aria-hidden
-      />
-      <div
-        className="blob fixed right-[-4%] top-[45%] h-80 w-80 bg-[#34d399]"
-        style={{ opacity: 0.18, animationDelay: "-8s" }}
-        aria-hidden
-      />
+      {/* Clipped layer: the blobs sit partly off-screen and would otherwise
+          widen the page into a horizontal scroll on phones. */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+        <div
+          className="blob left-[-6%] top-24 h-72 w-72 bg-[#6366f1]"
+          style={{ opacity: 0.22 }}
+        />
+        <div
+          className="blob right-[-4%] top-[45%] h-80 w-80 bg-[#34d399]"
+          style={{ opacity: 0.18, animationDelay: "-8s" }}
+        />
+      </div>
 
       <Celebration state={celebration} onDone={() => setCelebration(null)} />
       <UpgradeModal reason={upgradeReason} onClose={() => setUpgradeReason(null)} />
